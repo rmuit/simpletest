@@ -5,10 +5,10 @@ function simpletest_help($section) {
   $output = "";
 
   switch ($section) {
-    case 'admin/system/modules#description':
+    case 'admin/modules#description':
       $output = t("Simple unit testing suite");
       break;
-    case 'admin/system/modules/simpletest':
+    case 'admin/settings/simpletest':
       $output = '';
       break;
   }

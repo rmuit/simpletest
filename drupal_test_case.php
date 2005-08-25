@@ -204,6 +204,7 @@ class DrupalTestCase extends WebTestCase {
    * tearDown implementation, setting back switched modules etc
    */
   function tearDown() {
+    parent::tearDown();
     foreach ($this->_cleanupModules as $name => $status) {
       db_query("UPDATE {system} SET status = %d WHERE name = '%s' AND type = 'module'", $status, $name); 
     }

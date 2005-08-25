@@ -102,13 +102,7 @@ class PageCreationTest extends  DrupalTestCase {
 
   function testPageCreation() {
     /* Prepare settings */
-    $node_options_page = variable_get('node_options_page', array('status', 'promote'));
-    if ($node_options_page != array('status', 'promote')) {
-      variable_set('node_options_page', array('status', 'promote'));
-      $this->pass('setting node_options_page');
-    } else {
-      $node_options_page = FALSE; 
-    }
+    $this->drupalVariableSet('node_options_page', array('status', 'promote'));
    
     /* Prepare a user to do the stuff */
     $user = $this->_createUserRolePerm(array('access content', 'create pages'));
@@ -127,12 +121,6 @@ class PageCreationTest extends  DrupalTestCase {
     $this->assertWantedText($edit['body'], 'Page body found');
     
     db_query('DELETE FROM {node} WHERE nid = %d', $node->nid);
-    
-    /* Reset settings if necesary */
-    if ($node_options_page !== FALSE) {
-      variable_set('node_options_page', $node_options_page);
-      $this->pass('resetting node_options_page');
-    }
   }
 }
 ?>

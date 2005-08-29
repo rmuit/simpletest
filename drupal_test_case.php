@@ -91,15 +91,15 @@ class DrupalTestCase extends WebTestCase {
    * @param integer $number   number of characters
    * @return ransom string
    */
-  function randomName($number = 4, $ret = 'simpletest_') {
+  function randomName($number = 4, $prefix = 'simpletest_') {
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_';
     for ($x = 0; $x < $number; $x++) {
-        $ret .= $chars{mt_rand(0, strlen($chars)-1)};
+        $prefix .= $chars{mt_rand(0, strlen($chars)-1)};
         if ($x == 0) {
             $chars .= '0123456789';
         }
     }
-    return $ret;
+    return $prefix;
   }
 
   /**

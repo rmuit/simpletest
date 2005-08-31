@@ -244,13 +244,18 @@ class DrupalTestCase extends WebTestCase {
    *
    * @param object user object with pass_raw property!
    */
-  function drupalLoginUser($user) {
+  function drupalLoginUser($user = NULL) {
+    if ($user === NULL) {
+      $user = $this->drupalCreateUserRolePerm();
+    }
     $edit = array('name' => $user->name, 'pass' => $user->pass_raw);
     $this->drupalPostRequest('user/login', $edit, 'Log in');
 
     $this->assertWantedText($user->name, ' [login] found name: ' . $user->name);
     $this->assertNoUnwantedText(t('The username %name has been blocked.', array('%name' => $user->name)), ' [login] not blocked');
     $this->assertNoUnwantedText(t('The name %name is a reserved username.', array('%name' => $user->name)), ' [login] not reserved');
+    
+    return $user;
   }
   
   /**

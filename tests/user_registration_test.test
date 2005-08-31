@@ -20,7 +20,6 @@ class UserRegistrationTest extends DrupalTestCase {
     $mail = "$name@example.com";
     $edit = array('name' => $name,
                   'mail' => $mail);
-    
     $this->drupalPostRequest('user/register', $edit, 'Create new account');
     
     $this->assertWantedText(t('Your password and further instructions have been sent to your e-mail address.'), 'Your password and further instructions ... found');
@@ -72,7 +71,7 @@ class UserRegistrationTest extends DrupalTestCase {
     $this->assertEqual($user->pass, md5($new_pass), 'Correct password in database');
     
     /* logout */
-    $this->_browser->clickLink(t('log out')); 
+    $this->clickLink('log out'); 
     $this->assertNoUnwantedText($user->name, 'Logged out');
     
     /* login again */

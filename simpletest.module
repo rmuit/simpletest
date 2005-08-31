@@ -32,6 +32,12 @@ function simpletest_menu($may_cache) {
   }
 }
 
+/**
+ * Implementation of hook_perm().
+ */
+function simpletest_perm() {
+  return array('admister unit tests'); 
+}
 
 /**
  * Try to load the simepletest

@@ -90,7 +90,7 @@ class UploadPictureTests extends DrupalTestCase {
   }
 
   function get_info() {
-     return array('name' => 'Testing Uploading Picture', 'desc' => 'Testing Uploading Picture Process. Uploading picture doesn\'t have to be allowed' , 'group' => 'Upload Tests');
+     return array('name' => 'Upload user picture', 'desc' => 'Assure that dimension check, extension check and image scaling work as designed.' , 'group' => 'Upload Tests');
   }
 
   /*

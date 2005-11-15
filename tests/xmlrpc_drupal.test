@@ -32,7 +32,7 @@ class XMLRPCDrupalTest extends DrupalTestCase {
     /* Please do not alter the account */
     $authname   = 'simpletest_da@drupal.org';
     $login_edit = array('name' => $authname, 'pass' => 'da_simpletest');
-    $this->drupalPostRequest('user/login', $login_edit, 'Log in');
+    $this->drupalPostRequest('user', $login_edit, 'Log in');
     
     $pname = $authname;
     $this->assertWantedText($pname, 'Logged in (name found)');

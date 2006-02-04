@@ -127,6 +127,7 @@ class DrupalTestCase extends WebTestCase {
       }
       /* refresh module_list */
       module_list(TRUE);
+      menu_rebuild();
       $this->pass(" [module] $name enabled");
       return TRUE;
     }

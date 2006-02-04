@@ -54,10 +54,10 @@ class UserRegistrationTest extends DrupalTestCase {
     $this->drupalPostRequest('user', $login_edit, 'Log in');
     $this->assertWantedText(t('Sorry. Unrecognized username or password.'), 'Test for failed Login');
     $url = user_pass_reset_url($user);
-    /* TODO: find a better way, we currently have to do it that way, see user.module line 987. */
+    /* TODO: find a better way, we currently have to do it that way, see user.module line 1041. */
     sleep(1);
     $this->_browser->get($url);
-    $this->assertWantedText(t("You have used a one-time login, which won't be valid anymore"), "Check for one time login notice ($url)");
+    $this->assertWantedText(t("You have just used your one-time login link."), "Check for one time login notice ($url)");
     
     /* now lets change our password */
     $new_pass = user_password();

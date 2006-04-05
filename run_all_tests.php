@@ -11,10 +11,9 @@
  * Run all unit tests for all enabled modules.
 
  */
+chdir(realpath(dirname(__FILE__) . '/../../'));
 
-chdir('../../');
-
-include_once './includes/bootstrap.inc';
+require_once './includes/bootstrap.inc';
 
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 

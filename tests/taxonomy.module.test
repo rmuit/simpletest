@@ -283,9 +283,9 @@ class TaxonomyTestNodeApi extends DrupalTestCase {
     // go to node/add/story
     $this->_browser->get(url('node/add/story', NULL, NULL, TRUE));
     $req = $this->_browser->getRequest();
-    dprint_r($req);
+
     $headers = $this->_browser->getHeaders();
-    dprint_r($headers);
+
     $content = $this->drupalGetContent();
     print($content). "\n\n\n all done \n\n";
 

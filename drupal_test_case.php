@@ -225,7 +225,7 @@ class DrupalTestCase extends WebTestCase {
     $ua = array();
     $ua['name']   = $this->randomName();
     $ua['mail']   = $ua['name'] . '@example.com';
-    $ua['roles']  = array($rid);
+    $ua['roles']  = array($rid=>$rid);
     $ua['pass']   = user_password();
     $ua['status'] = 1;
 

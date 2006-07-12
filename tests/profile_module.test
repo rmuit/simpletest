@@ -802,7 +802,7 @@ class ProfileModuleTestDate extends DrupalTestCase {
     }
 
     list($format) = explode(' - ', variable_get('date_format_short', 'm/d/Y'), 2);
-    $format = substr($format,0,strpos($format,' '));
+
     $replace = array('d' => sprintf('%02d', 9),
                        'j' => 9,
                        'm' => sprintf('%02d', '1'),

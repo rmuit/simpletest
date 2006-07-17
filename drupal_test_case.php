@@ -126,7 +126,7 @@ class DrupalTestCase extends WebTestCase {
         $this->_cleanupModules[$name] = 0;
       }
       /* refresh module_list */
-      module_list(TRUE);
+      module_list(TRUE, FALSE);
       menu_rebuild();
       $this->pass(" [module] $name enabled");
       return TRUE;
@@ -154,7 +154,7 @@ class DrupalTestCase extends WebTestCase {
         $this->_cleanupModules[$name] = 1;
       }
       /* refresh module_list */
-      module_list(TRUE);
+      module_list(TRUE, FALSE);
       $this->pass(" [module] $name disabled");
       return TRUE;
     }
@@ -271,6 +271,9 @@ class DrupalTestCase extends WebTestCase {
       db_query("UPDATE {system} SET status = %d WHERE name = '%s' AND type = 'module'", $status, $name);
     }
     $this->_cleanupModules = array();
+    // Refresh the modules list
+    module_list(TRUE, FALSE);
+    menu_rebuild();
 
     foreach ($this->_cleanupVariables as $name => $value) {
       if (is_null($value)) {

@@ -130,7 +130,7 @@ class DrupalTestCase extends WebTestCase {
       
       include_once './includes/install.inc';
       $versions = drupal_get_schema_versions($name);
-      if (drupal_get_installed_schema_version($name) == SCHEMA_UNINSTALLED) {
+      if (drupal_get_installed_schema_version($name, TRUE) == SCHEMA_UNINSTALLED) {
         drupal_set_installed_schema_version($name, $versions ? max($name) : SCHEMA_INSTALLED);
         module_invoke($name, 'install');
       }

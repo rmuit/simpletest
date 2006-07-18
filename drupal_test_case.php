@@ -132,7 +132,7 @@ class DrupalTestCase extends WebTestCase {
       $versions = drupal_get_schema_versions($name);
       if (drupal_get_installed_schema_version($name) == SCHEMA_UNINSTALLED) {
         drupal_set_installed_schema_version($name, $versions ? max($name) : SCHEMA_INSTALLED);
-        module_invoke($module, 'install');
+        module_invoke($name, 'install');
       }
       
       menu_rebuild();

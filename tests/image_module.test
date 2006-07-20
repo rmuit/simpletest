@@ -90,7 +90,7 @@ class ImageModuleTest extends DrupalTestCase {
     $found = false;
     
     foreach($matches[1] as $file) {
-      if (strripos($file, "Test")) {
+      if (strripos($file, "TestGD")) {
         $size = getimagesize($file);
         if ($size == $my_size) {
           $found = true;

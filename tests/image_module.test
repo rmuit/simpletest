@@ -8,6 +8,7 @@ class ImageModuleTest extends DrupalTestCase {
   }
   
   function setUp() {
+  	parent::setUp();
   	$dir = file_directory_path().'/'.variable_get('image_default_path', 'images');
   	$temp_dir = $dir.'/temp';
   	$dir_created = file_check_directory($dir, TRUE);

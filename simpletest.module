@@ -190,7 +190,7 @@ function simpletest_run_tests($testlist = NULL) {
  */
 function simpletest_simpletest() {
 	$dir = drupal_get_path('module', 'simpletest'). '/tests';
-	$tests = file_scan_directory($dir, '\.test');
+	$tests = file_scan_directory($dir, '\.test$');
   return array_keys($tests);
 }
 

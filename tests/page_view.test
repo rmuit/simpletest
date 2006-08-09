@@ -13,7 +13,6 @@ class PageViewTest extends DrupalTestCase {
   }
   
   function setUp() {
-    $this->drupalModuleEnable('page');
   }
 
   function testPageView() {

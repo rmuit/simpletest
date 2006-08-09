@@ -12,7 +12,6 @@ class PageCreationTest extends  DrupalTestCase {
   }
 
   function setUp() {
-    $this->drupalModuleEnable('page');
   }
   
   function testPageCreation() {
@@ -20,7 +19,7 @@ class PageCreationTest extends  DrupalTestCase {
     $this->drupalVariableSet('node_options_page', array('status', 'promote'));
    
     /* Prepare a user to do the stuff */
-    $web_user = $this->drupalCreateUserRolePerm(array('access content', 'create pages'));
+    $web_user = $this->drupalCreateUserRolePerm(array('edit own page content', 'create page content'));
     $this->drupalLoginUser($web_user);
     
     $edit = array();

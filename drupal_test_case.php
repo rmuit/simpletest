@@ -112,7 +112,7 @@ class DrupalTestCase extends WebTestCase {
    * @return boolean success
    */
   function drupalModuleEnable($name) {
-  	if (module_exist($name)) {
+  	if (module_exists($name)) {
       $this->pass(" [module] $name already enabled");
       return TRUE;
     }
@@ -124,7 +124,7 @@ class DrupalTestCase extends WebTestCase {
       module_enable($name);
     }
     module_list(TRUE, FALSE);
-    if(module_exist($name)) {
+    if(module_exists($name)) {
       if (!isset($this->_cleanupModules[$name])) {
         $this->_cleanupModules[$name] = 0;
       }
@@ -144,7 +144,7 @@ class DrupalTestCase extends WebTestCase {
    * @return boolean success
    */
   function drupalModuleDisable($name) {
-    if (!module_exist($name)) {
+    if (!module_exists($name)) {
       $this->pass(" [module] $name already disabled");
       return TRUE;
     }

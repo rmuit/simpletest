@@ -28,7 +28,7 @@ class PageCreationTest extends  DrupalTestCase {
     $this->drupalPostRequest('node/add/page', $edit, 'Submit');
     
     // see: http://drupal.org/node/37754 why this currently fails
-    $this->assertWantedText(t('Your %post was created.', array ('%post' => 'page')), 'Page created');
+    $this->assertWantedText(t('Your @post was created.', array ('@post' => 'page')), 'Page created');
     
     $node = node_load(array('title' => $edit['title']));
     $this->assertNotNull($node, 'Node found in database. %s');

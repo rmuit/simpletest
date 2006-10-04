@@ -109,8 +109,6 @@ function simpletest_entrypoint() {
 	switch ($op) {
 		case t('Run All Tests'):
       $output  = simpletest_run_tests();
-			$output .= form_submit(t('Back to Menu'));
-			$output  = form($output);
   		break;
 		
 		case t('Run Selected Tests'):

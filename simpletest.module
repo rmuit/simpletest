@@ -114,7 +114,7 @@ function simpletest_entrypoint() {
 		case t('Run Selected Tests'):
 		  $tests_list = array();
 			foreach($edit as $test => $checked) {
-				if ($checked && ($test != 'form_id') && ($test != 'op')) {
+				if ($checked && ($test != 'form_id') && ($test != 'op') && ($test != 'form_token')) {
 					$tests_list[] = $test;
 				}
 			}

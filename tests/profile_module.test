@@ -950,7 +950,7 @@ class ProfileModuleTest2 extends DrupalTestCase {
     $this->_browser->get(url("profile/". $form_name. "/$choice"));
     $title = str_replace("%value", $choice, $page_title);
 
-    $this->assertTitle($title. ' | '. variable_get('site_name', 'drupal'), "Checking title $title");
+    $this->assertTitle($title. ' | '. variable_get('site_name', 'Drupal'), "Checking title $title");
     $this->assertWantedText($title, "Checking $title in content");
     $delete_fields[] = $fid;
 

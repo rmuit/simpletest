@@ -328,9 +328,14 @@ class DrupalTestCase extends WebTestCase {
    * @param object user object with pass_raw property!
    */
   function drupalLoginUser($user = NULL) {
+
+    $this->drupalGet( url("user", NULL, NULL, TRUE) );
+    // Going to the page retrieves the cookie, as the browser should save it
+
     if ($user === NULL) {
       $user = $this->drupalCreateUserRolePerm();
     }
+    
     $edit = array('name' => $user->name, 'pass' => $user->pass_raw);
     $this->drupalPostRequest('user', $edit, 'Log in');
 

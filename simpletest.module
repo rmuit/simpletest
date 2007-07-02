@@ -203,8 +203,9 @@ function simpletest_overview_form() {
  * @param array $testlist list of tests to run or DEFAULT NULL run all tests
  */
 function simpletest_run_tests($testlist = NULL) {
-  if (!defined("TEST_RUNNING")) {
-    define("TEST_RUNNING", true);
+  global $test_running;
+  if (!$test_running) {
+    $test_running = TRUE;
     $test = simpletest_get_total_test($testlist);
     if (SimpleReporter::inCli()) {
       cache_clear_all();
@@ -215,6 +216,7 @@ function simpletest_run_tests($testlist = NULL) {
     cache_clear_all();
     $test->run($reporter);
 //    exit;
+    $test_running = FALSE;
     return $reporter->getOutput();
   }
 }

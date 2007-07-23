@@ -199,7 +199,7 @@ class DrupalTestCase extends WebTestCase {
     else {
       $try = module_enable(array($name));
     }
-    module_list(TRUE, FALSE);
+
     if(module_exists($name)) {
       if (!isset($this->_cleanupModules[$name])) {
         $this->_cleanupModules[$name] = 0;

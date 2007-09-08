@@ -11,7 +11,7 @@ class XMLRPCValidator1Test extends DrupalTestCase {
     if (!$this->drupalModuleEnable('simpletest_xmlrpc')) {
       return FALSE; 
     }
-    $xml_url = url(NULL, NULL, NULL, TRUE) . 'xmlrpc.php';
+    $xml_url = url(NULL, array('absolute' => TRUE)) . 'xmlrpc.php';
     srand();
     mt_srand();
 

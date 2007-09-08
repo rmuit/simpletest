@@ -25,7 +25,7 @@ class PageCreationTest extends  DrupalTestCase {
     $edit = array();
     $edit['title']    = '!SimpleTest test node! ' . $this->randomName(10);
     $edit['body']     = '!SimpleTest test body! ' . $this->randomName(32) . ' ' . $this->randomName(32);
-    $this->drupalPostRequest('node/add/page', $edit, 'Submit');
+    $this->drupalPostRequest('node/add/page', $edit, 'Save');
     
     $this->assertWantedRaw(t('Your %post has been created.', array ('%post' => 'Page')), 'Page created');
     

@@ -128,8 +128,6 @@ class ImageModuleTest extends DrupalTestCase {
     $this->assertWantedText($title, "Checking title : $title");
     $this->assertWantedText($description, "Checking body: $description");
 
-    // delete image node
-    node_delete($node->nid);
   }
 }
 

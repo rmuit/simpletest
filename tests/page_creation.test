@@ -32,7 +32,6 @@ class PageCreationTest extends  DrupalTestCase {
     $node = node_load(array('title' => $edit['title']));
     $this->assertNotNull($node, 'Node found in database. %s');
     
-    node_delete($node->nid);
   }
 }
 ?>

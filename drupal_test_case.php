@@ -378,6 +378,11 @@ class DrupalTestCase extends WebTestCase {
 
     while (sizeof($this->_cleanupUsers) > 0) {
       $uid = array_pop($this->_cleanupUsers);
+      // cleanup nodes this user created
+      $result = db_query("SELECT nid FROM {node} WHERE uid = %d", $uid);
+      while ($node = db_fetch_array($result)) {
+        node_delete($node['nid']);
+      }
       user_delete(array(), $uid);
     }
     parent::tearDown();

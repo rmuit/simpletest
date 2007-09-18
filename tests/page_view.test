@@ -52,6 +52,7 @@ class PageViewTest extends DrupalTestCase {
     $this->assertResponse(403);
     
     $test_user = $this->drupalCreateUserRolePerm(array('administer nodes'));
+    //TODO: Add edit page attempt with administer nodes user
     node_delete(array('nid' => $node->nid));
   }
 }

@@ -351,6 +351,7 @@ class DrupalTestCase extends WebTestCase {
    * tearDown implementation, setting back switched modules etc
    */
   function tearDown() {
+    
     foreach ($this->_cleanupModules as $name => $status) {
       db_query("UPDATE {system} SET status = %d WHERE name = '%s' AND type = 'module'", $status, $name);
     }
@@ -385,6 +386,15 @@ class DrupalTestCase extends WebTestCase {
       }
       user_delete(array(), $uid);
     }
+    
+    //Output drupal warnings and messages into assert messages
+    $drupal_msgs = drupal_get_messages();
+    foreach($drupal_msgs as $type => $msgs) {
+      foreach ($msgs as $msg) {
+        $this->assertTrue(TRUE, "$type: $msg");
+      }
+    }
+    
     parent::tearDown();
   }
 

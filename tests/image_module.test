@@ -93,7 +93,7 @@ class ImageModuleTest extends DrupalTestCase {
     
     // get node nid
     $node = node_load(array('title' => $title));
-    $this->drupalGet(url("node/$node->nid", NULL, NULL, TRUE));
+    $this->drupalGet(url("node/$node->nid", array('absolute' => TRUE)));
     $content = $this->_browser->getContent();
     $this->assertWantedText($title, "Checking title : $title");
     $this->assertWantedText($description, "Checking body: $description");

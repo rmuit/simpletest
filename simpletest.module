@@ -142,7 +142,7 @@ function simpletest_overview_form_submit($form, &$form_state) {
     case 'selected_tests':
       $test_list = array();
       foreach ($form_state['values'] as $item => $value){
-        if ($value == 1 && strpos($item, 'selectall') === FALSE) {
+        if ($value === 1 && strpos($item, 'selectall') === FALSE) {
           $tests_list[] = $item;
         }
       }

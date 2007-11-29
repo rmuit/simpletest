@@ -1,3 +1,4 @@
 ; $Id$
 name = Simpletest_xmlrpc
 description = Supports the simpletest module for the xmlrpc tests. Does not need to manually enabled.
+package = Simpletest

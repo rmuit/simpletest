@@ -130,7 +130,7 @@ function simpletest_running_output($output = NULL) {
  * @param $form_values
  */
 function simpletest_overview_form_submit($form_id, $form_values) {
-  
+
   switch ($form_values['running_options']){
     
     case 'all_tests':
@@ -279,6 +279,18 @@ function simpletest_settings() {
     '#title' => t('Password'),
     '#type' => 'password',
     '#default_value' => variable_get('simpletest_httpauth_pass', '')
+  );
+  
+  $form['devel'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Devel module settings'),
+    '#description' => t('Devel module can cause problems if you have query log enabled. It will output a few thousand queries and crash your browser'),
+  );
+  
+  $form['devel']['simpletest_devel'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use devel query log on test result pages'),
+    '#default_value' => variable_get('simpletest_devel', false),
   );
   
   return system_settings_form($form);

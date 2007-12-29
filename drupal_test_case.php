@@ -67,7 +67,7 @@ class DrupalTestCase extends WebTestCase {
 
   /**
    * @abstract Brokder for the post function
-   * addes the authetnication headers if
+   * adds the authetnication headers if
    * neccessary
    * @author Earnest Berry III <earnest.berry@gmail.com>
    *

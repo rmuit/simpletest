@@ -195,7 +195,7 @@ class DrupalReporter extends SimpleReporter {
   }
 
   /**
-   * Could be extended to show more headeres or whatever?
+   * Could be extended to show more headers or whatever?
    **/
   function getOutput() {
     return drupal_get_form('unit_tests', $this);
@@ -239,7 +239,7 @@ class DrupalReporter extends SimpleReporter {
   }
   
   /**
-   * Retrives weight of the currently deepest fieldset
+   * Retrieves weight of the currently deepest fieldset
    */
   function getParentWeight($form = NULL, $keys = NULL ) {
   	if (!isset($form)) {

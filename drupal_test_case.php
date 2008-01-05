@@ -94,15 +94,23 @@ class DrupalTestCase extends WebTestCase {
    * By $reporting you specify if this request does assertions or not
    * Warning: empty ("") returns will cause fails with $reporting
    *
-   * @param string  $path      location of the post form
-   * @param array   $edit      field data
-   * @param string  $submit    name of the submit button, untranslated
+   * @param string  $path
+   *   Location of the post form. Either a Drupal path or an absolute path or
+   *   NULL to post to the current page.
+   * @param array $edit
+   *   Field data in an assocative array. Changes the current input fields
+   *   (where possible) to the values indicated. A checkbox can be set to
+   *   TRUE to be checked and FALSE to be unchecked.
+   * @param string $submit
+   *   Untranslated name of the submit button.
    */
   function drupalPostRequest($path, $edit = array(), $submit) {
-    $url = url($path, array('absolute' => TRUE));
-    $ret = $this->drupalGet($url);
+    if (isset($path)) {
+      $url = url($path, array('absolute' => TRUE));
+      $ret = $this->drupalGet($url);
+      $this->assertTrue($ret, " [browser] GET $url");
+    }
 
-    $this->assertTrue($ret, " [browser] GET $url");
     foreach ($edit as $field_name => $field_value) {
       $ret = $this->_browser->setFieldByName($field_name, $field_value)
           || $this->_browser->setFieldById("edit-$field_name", $field_value);

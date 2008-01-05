@@ -284,7 +284,7 @@ class TaxonomyTestNodeApi extends DrupalTestCase {
     
     // why is this printing out the user profile page?
     // go to node/add/story
-    $this->drupalGet(url('node/add/story', array('absolute' => TRUE)));
+    $this->drupalGet('node/add/story');
     $req = $this->_browser->getRequest();
 
     $headers = $this->_browser->getHeaders();

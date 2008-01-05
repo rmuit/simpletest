@@ -41,18 +41,18 @@ class PageViewTest extends DrupalTestCase {
     $this->assertNotNull(node_load($node->nid), 'Node created');
 
     /* Tries to edit with anonymous user */
-    $html = $this->drupalGet(url("node/$node->nid/edit", array('absolute' => TRUE)));
+    $html = $this->drupalGet("node/$node->nid/edit");
     $this->assertResponse(403);
     
     /* Prepare a user to request the node view */
     $test_user = $this->drupalCreateUserRolePerm(array('access content'));
     $this->drupalLoginUser($test_user);
     
-    $html = $this->drupalGet(url("node/$node->nid/edit", array('absolute' => TRUE)));
+    $html = $this->drupalGet("node/$node->nid/edit");
     $this->assertResponse(403);
     
     $test_user = $this->drupalCreateUserRolePerm(array('administer nodes'));
     //TODO: Add edit page attempt with administer nodes user
-    node_delete(array('nid' => $node->nid));
+    node_delete($node->nid);
   }
 }

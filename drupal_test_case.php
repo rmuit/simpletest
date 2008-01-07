@@ -103,7 +103,7 @@ class DrupalTestCase extends WebTestCase {
    *   (where possible) to the values indicated. A checkbox can be set to
    *   TRUE to be checked and FALSE to be unchecked.
    * @param string $submit
-   *   Untranslated name of the submit button.
+   *   Untranslated value, id or name of the submit button.
    */
   function drupalPostRequest($path, $edit = array(), $submit) {
     if (isset($path)) {
@@ -117,8 +117,7 @@ class DrupalTestCase extends WebTestCase {
       $this->assertTrue($ret, " [browser] Setting $field_name=\"$field_value\"");
     }
 
-    $ret = $this->_browser->clickSubmit(t($submit))  || $this->_browser->clickSubmitByName($submit) || $this->_browser->clickImageByName($submit);
-//    $ret = $this->_browser->clickSubmitByName('op');
+    $ret = $this->_browser->clickSubmit(t($submit))  || $this->_browser->clickSubmitById($submit) || $this->_browser->clickSubmitByName($submit) || $this->_browser->clickImageByName($submit);
     $this->assertTrue($ret, ' [browser] POST by click on ' . t($submit));
     $this->_content = $this->_browser->getContent();
   }

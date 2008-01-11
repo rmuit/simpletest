@@ -208,15 +208,6 @@ function simpletest_run_tests($testlist = NULL) {
 }
 
 /**
- * Implementation of hook_simpletest().
- */
-function simpletest_simpletest() {
-  $dir = drupal_get_path('module', 'simpletest'). '/tests';
-  $tests = file_scan_directory($dir, '\.test$');
-  return array_keys($tests);
-}
-
-/**
  * This function makes sure no unnecessary copies of the DrupalUnitTests object are instantiated
  * @param  array $classes list of all classes the test should concern or
  *                        DEFAULT NULL

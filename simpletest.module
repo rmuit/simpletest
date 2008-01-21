@@ -11,9 +11,12 @@ function simpletest_help($section) {
     case 'admin/modules#description':
       $output = t("Simple unit testing suite");
       break;
-    case 'admin/settings/simpletest':
-      $output = '';
-      break;
+    case 'admin/help#simpletest':
+      $output  = '<p>'. t('The SimpleTest module is a framework for running automated unit tests in Drupal. It can be used to verify a working state of Drupal before and after any code changes, or as a means for developers to write and execute tests for their modules. It integrates with the <a href="@simpletest-official">SimpleTest PHP library</a>.', array('@simpletest-official' => 'http://www.simpletest.org/')) .'</p>';
+      $output .= '<p>'. t('Visit <a href="@admin-simpletest">Administer >> Site building >> SimpleTest</a> to display a list of available tests. For comprehensive testing, select <em>all</em> tests, or individually select tests for more targeted testing. (Note: Selecting <em>all</em> tests may take several minutes to complete.)', array('@admin-simpletest' => url('admin/build/simpletest'))) .'</p>';
+      $output .= '<p>'. t('After the tests have run, a message will be displayed next to each test group indicating whether tests within it passed, failed, or had exceptions. A pass means that a test returned the expected results, while fail means that it did not. An exception normally indicates an error outside of the test, such as a PHP warning or notice. If there were fails or exceptions, the results are expanded, and the tests that had issues will be indicated in red or pink rows. Use these results to refine your code and tests until all tests return a pass.') .'</p>';
+      $output .= '<p>'. t('For more information on creating and modifying your own tests, see the <a href="@simpletest-api">SimpleTest API Documentation</a> in the Drupal handbook.', array('@simpletest-api' => 'http://drupal.org/simpletest')) .'</p>';
+      $output .= '<p>'. t('For more information, see the online handbook entry for <a href="@simpletest">SimpleTest module</a>.', array('@simpletest' => 'http://drupal.org/handbook/modules/simpletest')) .'</p>';
   }
 
   return $output;
@@ -25,17 +28,20 @@ function simpletest_help($section) {
 function simpletest_menu($may_cache) {
   if ($may_cache) {
     $items = array();
-    $items[] = array('path' => 'admin/build/simpletest', 
-                     'title' => 'Simpletest unit testing',
-                     'callback' => 'simpletest_entrypoint',
-                     'description' => t('Run tests against Drupal core and your active modules. These tests help assure that your site code is working as designed.'),
-                     'access' => user_access('administer unit tests'));
-    $items[] = array('path' => 'admin/settings/simpletest', 
-      'title' => t('Simpletest settings'), 
+    $items[] = array(
+      'path' => 'admin/build/simpletest', 
+      'title' => 'Simpletest',
+      'callback' => 'simpletest_entrypoint',
+      'description' => t('Run tests against Drupal core and your active modules. These tests help assure that your site code is working as designed.'),
+      'access' => user_access('administer unit tests'),
+    );
+    $items[] = array(
+      'path' => 'admin/settings/simpletest', 
+      'title' => 'Simpletest settings', 
       'description' => t('Configure unit testing framework.'),
       'callback' => 'drupal_get_form',
       'callback arguments' => 'simpletest_settings',
-      'access' => user_access('administer unit tests')
+      'access' => user_access('administer unit tests'),
     );
     return $items;
   }
@@ -64,11 +70,11 @@ function simpletest_load() {
   
   $loaded = true;
   if (!defined('SIMPLE_TEST')) {
-    define('SIMPLE_TEST', drupal_get_path('module', 'simpletest'). '/simpletest'); 
+    define('SIMPLE_TEST', drupal_get_path('module', 'simpletest') .'/simpletest'); 
   } 
-  if (!is_dir(SIMPLE_TEST)){
+  if (!is_dir(SIMPLE_TEST)) {
     $output = t('Sorry but the simpletest cannot be found in the current installation. Please notice that simpletest.module needs Simpletest framework. '
-              . 'Please download it from !simpletest_link and place it into the same directory as simpletest.module: %simpletest_directory',
+              .'Please download it from !simpletest_link and place it into the same directory as simpletest.module: %simpletest_directory',
                 array('!simpletest_link' => l('Simpletest on SourceForge', 'https://sourceforge.net/project/showfiles.php?group_id=76550'),
                       '%simpletest_directory' => SIMPLE_TEST));
     drupal_set_message($output, 'error');
@@ -76,13 +82,13 @@ function simpletest_load() {
   }
   
   /* We currently use only the web tester that DrupalTestCase is built upon */
-  require_once(SIMPLE_TEST . '/web_tester.php');
-  require_once(SIMPLE_TEST . '/reporter.php');
+  require_once(SIMPLE_TEST .'/web_tester.php');
+  require_once(SIMPLE_TEST .'/reporter.php');
   require_once('drupal_reporter.php');
  
   if (version_compare(SimpleTest::getVersion() , '1.0.1beta2') < 0) {
     $output = t('Due to a lot of refactoring done on simpletest library side. Simpletest module is not compatible with simpeltest versions lower thab 1.0.1beta2. '
-              . 'Please download the latest version from !simpletest_link and place it into the same directory as simpletest.module: %simpletest_directory',
+              .'Please download the latest version from !simpletest_link and place it into the same directory as simpletest.module: %simpletest_directory',
                 array('!simpletest_link' => l('Simpletest on SourceForge', 'https://sourceforge.net/project/showfiles.php?group_id=76550'),
                       '%simpletest_directory' => SIMPLE_TEST));
     drupal_set_message($output, 'error');
@@ -91,9 +97,9 @@ function simpletest_load() {
   
 
   
-  $path = drupal_get_path('module', 'simpletest'). '/';
-  require_once($path . 'drupal_test_case.php');
-  require_once($path . 'drupal_unit_tests.php');
+  $path = drupal_get_path('module', 'simpletest') .'/';
+  require_once($path .'drupal_test_case.php');
+  require_once($path .'drupal_unit_tests.php');
   return true;
 }
 
@@ -109,7 +115,7 @@ function simpletest_entrypoint() {
      */
     return '&nbsp;';  
   }  
-  drupal_add_js(drupal_get_path('module', 'simpletest') . '/simpletest.js', 'module');
+  drupal_add_js(drupal_get_path('module', 'simpletest') .'/simpletest.js', 'module');
   $output = drupal_get_form('simpletest_overview_form');
 	
   print theme('page',  simpletest_running_output() . $output);
@@ -131,7 +137,7 @@ function simpletest_running_output($output = NULL) {
  */
 function simpletest_overview_form_submit($form_id, $form_values) {
 
-  switch ($form_values['running_options']){
+  switch ($form_values['running_options']) {
     
     case 'all_tests':
       $output  = simpletest_run_tests();
@@ -139,20 +145,19 @@ function simpletest_overview_form_submit($form_id, $form_values) {
     
     case 'selected_tests':
       $test_list = array();
-      foreach ($form_values as $item => $value){
+      foreach ($form_values as $item => $value) {
         if ($value === 1 && strpos($item, 'selectall') === FALSE) {
           $tests_list[] = $item;
         }
       }
       if (count($tests_list) > 0 ) {
-				$output = simpletest_run_tests($tests_list);
-			}
-			else { 
-				// no test has been selected
-				drupal_set_message(t('No test has been selected.'), 'error');
-			}
-    break;  
-    
+        $output = simpletest_run_tests($tests_list);
+      }
+      else { 
+        // no test has been selected
+        drupal_set_message(t('No test has been selected.'), 'error');
+      }
+      break;  
     default:
       drupal_set_message(t('No test has been selected.'), 'error');
   }
@@ -182,7 +187,7 @@ function simpletest_overview_form() {
       '#title' => 'Tests',
       '#attributes' => array('class' => $group_class), 
     );
-    foreach($tests as $test) {
+    foreach ($tests as $test) {
       $test_info = $test->get_info();
       $desc = $test_info['desc'];
       $group['tests'][get_class($test)] = array('#type' => 'checkbox', '#title' => $test_info['name'], '#default_value' => 0,
@@ -215,7 +220,7 @@ function simpletest_run_tests($testlist = NULL) {
     $test = simpletest_get_total_test($testlist);
     if (SimpleReporter::inCli()) {
       cache_clear_all();
-      exit ($test->run(new TextReporter()) ? 0 : 1);
+      exit($test->run(new TextReporter()) ? 0 : 1);
     }
     //$reporter = &new HtmlReporter();
     $reporter = &new DrupalReporter();

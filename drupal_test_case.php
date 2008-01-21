@@ -118,8 +118,7 @@ class DrupalTestCase extends WebTestCase {
       }
     }
     
-    $ret = $this->_browser->clickSubmit(t($submit))  || $this->_browser->clickSubmitByName($submit) || $this->_browser->clickImageByName($submit);
-//    $ret = $this->_browser->clickSubmitByName('op');
+    $ret = $this->_browser->clickSubmit(t($submit))  || $this->_browser->clickSubmitById($submit) || $this->_browser->clickSubmitByName($submit) || $this->_browser->clickImageByName($submit);
     $this->assertTrue($ret, ' [browser] POST by click on ' . t($submit));
     $this->_content = $this->_browser->getContent();
   }

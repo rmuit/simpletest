@@ -195,7 +195,7 @@ class DrupalTestCase extends WebTestCase {
   function drupalPostRequest($path, $edit = array(), $submit) {
     if (isset($path)) {
       $ret = $this->drupalGet($path);
-      $this->assertTrue($ret, " [browser] GET $path");
+      $this->assertTrue($ret, t(' [browser] GET path "@path"', array('@path' => $path)));
     }
 
     foreach ($edit as $field_name => $field_value) {

@@ -17,10 +17,6 @@ class SearchMatchTest extends DrupalTestCase {
     
     $this->drupalModuleEnable('search');
   }
-  
-  function tearDown() {
-    parent::tearDown();
-  }
 
   function test_matching() {
     $this->_cleanup();

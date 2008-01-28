@@ -6,7 +6,11 @@
  */
 class UserRegistrationTest extends DrupalTestCase {
   function get_info() {
-    return array('name' => t('User registration'), 'desc' => t('Registers a user, fails login, successfully logs in, changes password, logs out.') , 'group' => 'User tests');
+    return array(
+      'name' => t('User registration'),
+      'desc' => t('Registers a user, fails login, successfully logs in, changes password, logs out.'),
+      'group' => 'User tests',
+    );
   }
   
   function testUserRegistration() {

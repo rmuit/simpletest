@@ -3,8 +3,11 @@
 /* $Id$ */
 class ImageModuleTest extends DrupalTestCase {
   function get_info() {
-    $modules = (module_list());
-    return array('name' => t('Image Module'), 'desc' => t('Testing add/edit/delete image node. If GD tooklit is found, perform image crop test. Requires image.module'), 'group' => 'Image');
+    return array(
+      'name' => t('Image Module'),
+      'desc' => t('Testing add/edit/delete image node. If GD tooklit is found, perform image crop test. Requires image.module'),
+      'group' => 'Image',
+    );
   }
   
   function setUp() {

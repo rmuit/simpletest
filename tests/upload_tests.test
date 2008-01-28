@@ -1,17 +1,13 @@
 <?php
 /* $Id$ */
 class UploadPictureTests extends DrupalTestCase {
-  
-
-  /**
-   * Implementation of tearDown, just calling parent teardown to clean up.
-   */
-  function tearDown() {
-    parent::tearDown();
-  }
 
   function get_info() {
-     return array('name' => 'Upload user picture', 'desc' => 'Assure that dimension check, extension check and image scaling work as designed.' , 'group' => 'Upload Tests');
+     return array(
+       'name' => 'Upload user picture',
+       'desc' => 'Assure that dimension check, extension check and image scaling work as designed.',
+       'group' => 'Upload Tests',
+     );
   }
 
   /*

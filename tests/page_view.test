@@ -5,16 +5,15 @@ class PageViewTest extends DrupalTestCase {
    * Implementation of get_info() for information
    */
   function get_info() {
-    return array('name' => t('Unauthorized node view'), 'desc' => t(
-      'Creates a node of type page and then an unpermissioned user attempts to edit the node, '
-    . 'before tries with an anonymous user. Asserts failure.'
-    . '</ br>WARNING: This is based on default registered user permuissions (no administer nodes).')
-    , 'group' => 'Node Tests');
+    return array(
+      'name' => t('Unauthorized node view'),
+      'desc' => t('Creates a node of type page and then an unpermissioned user attempts to edit the node, '
+                . 'before tries with an anonymous user. Asserts failure.'
+                . '</ br>WARNING: This is based on default registered user permuissions (no administer nodes).'),
+      'group' => 'Node Tests',
+    );
   }
   
-  function setUp() {
-  }
-
   function testPageView() {
     /* Prepare a node to view */
     global $user;

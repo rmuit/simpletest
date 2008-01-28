@@ -5,7 +5,11 @@
  */
 class UserValidationTest extends DrupalTestCase {
   function get_info() {
-    return array('name' => 'Username/email validation', 'desc' => 'Verify that username/email validity checks behave as designed.' , 'group' => 'User tests');
+    return array(
+      'name' => 'Username/email validation',
+      'desc' => 'Verify that username/email validity checks behave as designed.',
+      'group' => 'User tests',
+    );
   }
 
   // username validation

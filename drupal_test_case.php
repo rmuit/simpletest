@@ -106,6 +106,7 @@ class DrupalTestCase extends WebTestCase {
     $type = (object)$type;
 
     node_type_save($type);
+    node_types_rebuild();
 
     $this->_cleanupContentTypes[] = $type->type;
     return $type;
@@ -489,7 +490,6 @@ class DrupalTestCase extends WebTestCase {
 
     parent::tearDown();
   }
-
 
   /**
    * Just some info for the reporter

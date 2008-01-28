@@ -102,7 +102,7 @@ class DrupalTestCase extends WebTestCase {
     $url = url($path, NULL, NULL, TRUE);
     $ret = $this->drupalGet($url);
 
-    $this->assertTrue($ret, " [browser] GET $url");
+    $this->assertTrue($ret, t(' [browser] GET path "@path"', array('@path' => $path)));
     foreach ($edit as $field_name => $field_value) {
       $ret = $this->_browser->setFieldByName($field_name, $field_value)
           || $this->_browser->setFieldById("edit-$field_name", $field_value);

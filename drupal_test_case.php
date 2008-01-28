@@ -380,6 +380,15 @@ class DrupalTestCase extends WebTestCase {
       }
       user_delete(array(), $uid);
     }
+    
+    //Output drupal warnings and messages into assert messages
+    $drupal_msgs = drupal_get_messages();
+    foreach($drupal_msgs as $type => $msgs) {
+      foreach ($msgs as $msg) {
+        $this->assertTrue(TRUE, "$type: $msg");
+      }
+    }
+    
     parent::tearDown();
   }
 

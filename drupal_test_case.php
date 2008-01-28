@@ -193,7 +193,7 @@ class DrupalTestCase extends WebTestCase {
    * @param string $submit
    *   Untranslated value, id or name of the submit button.
    */
-  function drupalPostRequest($path, $edit = array(), $submit) {
+  function drupalPost($path, $edit = array(), $submit) {
     if (isset($path)) {
       $ret = $this->drupalGet($path);
       $this->assertTrue($ret, t(' [browser] GET path "@path"', array('@path' => $path)));
@@ -422,7 +422,7 @@ class DrupalTestCase extends WebTestCase {
     }
 
     $edit = array('name' => $user->name, 'pass' => $user->pass_raw);
-    $this->drupalPostRequest('user', $edit, $submit);
+    $this->drupalPost('user', $edit, $submit);
 
     $this->assertText( $user->name, ' [login] found name: ' . $user->name);
     $this->assertNoText(t('The username %name has been blocked.', array('%name' => $user->name)), ' [login] not blocked');

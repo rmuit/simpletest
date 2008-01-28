@@ -308,16 +308,13 @@ class TaxonomyTestNodeApi extends DrupalTestCase {
     // try to create story
     $title = $this->randomName();
     $body = $this->randomName(100);
-    $edit = array('title' => $title, 'body' => $body);
-
-    // Mutli-selects must be handles diffrently
-    // than other form/field types
-    $edit_multi = array('taxonomy-' . $vid => $parent);
+    $edit = array(
+      'title' => $title,
+      'body' => $body,
+      'taxonomy-' . $vid => $parent,
+    );
     
-    // multiple slect box was failing through drupalPostRequest. Use raw POST instead
-    // Failing because they were being sent/handled wrong (earnest.berry@gmail.com <Souvent22>)
-    $action = url('node/add/story', NULL, NULL, TRUE);
-    $this->drupalPostRequest($action, $edit, 'Submit', $edit_multi);
+    $this->drupalPostRequest('node/add/story', $edit, 'Submit');
     $content = $this->drupalGetContent();
     $patternArray['body text'] = $body;
     $patternArray['title'] = $title;
@@ -356,12 +353,13 @@ class TaxonomyTestNodeApi extends DrupalTestCase {
     $parent[] = $_tArray[0]->tid;
     $patternArray['term name 3'] = $termname;
 
-    $edit = array('title' => $title, 'body' => $body);
-    // Mutli-selects must be handles diffrently
-    // than other form/field types
-    $edit_multi = array('taxonomy-' . $vid => $parent);
+    $edit = array(
+      'title' => $title,
+      'body' => $body,
+      'taxonomy-' . $vid => $parent,
+    );
     
-    $this->drupalPostRequest('node/'. $node->nid .'/edit', $edit, 'Submit', $edit_multi);
+    $this->drupalPostRequest('node/'. $node->nid .'/edit', $edit, 'Submit');
 
     // TODO Do a MUCH better check here of the information msg
     $patternArray['information message'] = 'been updated';

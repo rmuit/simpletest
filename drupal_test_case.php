@@ -90,15 +90,12 @@ class DrupalTestCase extends WebTestCase {
   /**
    * Do a post request on a drupal page.
    * It will be done as usual post request with SimpleBrowser
-   * By $reporting you specify if this request does assertions or not
-   * Warning: empty ("") returns will cause fails with $reporting
    *
    * @param string  $path      location of the post form
    * @param array   $edit      field data
    * @param string  $submit    name of the submit button, untranslated
-   * @param boolean $reporting assertations or not
    */
-  function drupalPostRequest($path, $edit = array(), $submit, $edit_multi = array()) {
+  function drupalPostRequest($path, $edit = array(), $submit) {
     $url = url($path, NULL, NULL, TRUE);
     $ret = $this->drupalGet($url);
 
@@ -107,15 +104,6 @@ class DrupalTestCase extends WebTestCase {
       $ret = $this->_browser->setFieldByName($field_name, $field_value)
           || $this->_browser->setFieldById("edit-$field_name", $field_value);
       $this->assertTrue($ret, " [browser] Setting $field_name=\"$field_value\"");
-    }
-    if ( is_array($edit_multi) )  {
-      // Mutli-values
-      foreach( $edit_multi as $field_name => $field_values) {
-        $ret = $this->assertFieldById( "edit-$field_name") || $this->assertFieldByName( $field_name );
-        $this->assertTrue($ret, " [browser] Asserting multi-field $field_name=\"(" . implode(',', $field_values) . ")\"");
-        $ret = $this->setFieldById( "edit-$field_name", $field_values );
-        $this->assertTrue($ret, " [browser] Setting multi-field $field_name=\"(" . implode(',', $field_values) . ")\"");
-      }
     }
     
     $ret = $this->_browser->clickSubmit(t($submit))  || $this->_browser->clickSubmitById($submit) || $this->_browser->clickSubmitByName($submit) || $this->_browser->clickImageByName($submit);

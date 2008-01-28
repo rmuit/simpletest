@@ -16,20 +16,6 @@ class ActionsContentTest extends  DrupalTestCase {
   }
 
   /**
-   * Setup function
-   */
-  function setUp() {
-    parent::setUp();
-  }
-  
-  /**
-   * Teardown function
-   */
-  function tearDown(){
-    parent::tearDown();
-  }
-
-  /**
    * Various tests, all in one function to assure they happen in the right order.
    */
   function testActionsContent() {

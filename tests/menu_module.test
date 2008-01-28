@@ -20,10 +20,6 @@ class MenuModuleTestCase extends  DrupalTestCase {
     $this->drupalModuleEnable('menu');
   }
 
-  function tearDown() {
-    parent::tearDown();
-  }
-
   function testCreateCheckDelete() {
 
     $web_user = $this->drupalCreateUserRolePerm(array('access content', 'administer menu', 'access administration pages',));

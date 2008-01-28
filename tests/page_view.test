@@ -14,9 +14,6 @@ class PageViewTest extends DrupalTestCase {
   );
   }
   
-  function setUp() {
-  }
-
   function testPageView() {
     /* Prepare a node to view */
     global $user;

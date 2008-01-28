@@ -20,10 +20,6 @@ class TranslationModuleTestCase extends DrupalTestCase {
     $this->drupalModuleEnable('translation');
   }
   
-  function tearDown() {
-    parent::tearDown();
-  }
-  
   function test_content_translation() {
     // Setup users.
     $admin_user = $this->drupalCreateUserRolePerm(array('administer languages', 'administer content types'));

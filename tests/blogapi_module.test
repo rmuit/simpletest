@@ -1,5 +1,5 @@
 <?php
-// $Id:
+// $Id$
 
 class BlogAPIModuleTestCase extends DrupalTestCase {
   function get_info() {
@@ -16,10 +16,6 @@ class BlogAPIModuleTestCase extends DrupalTestCase {
     $this->drupalModuleEnable('blog');
     $this->drupalModuleEnable('blogapi');
     $this->drupalModuleEnable('taxonomy');
-  }
-  
-  function tearDown() {
-    parent::tearDown();
   }
   
   function test_blog_API() {

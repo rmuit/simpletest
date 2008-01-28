@@ -18,10 +18,6 @@ class BookModuleTestCase extends DrupalTestCase {
     $this->drupalModuleEnable('book');
   }
   
-  function tearDown() {
-    parent::tearDown();
-  }
-  
   /**
    * Test book funcitonality through node interfaces.
    */

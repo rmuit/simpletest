@@ -8,10 +8,11 @@ class PageCreationTest extends  DrupalTestCase {
    * Implementation of get_info() for information
    */
   function get_info() {
-    return array('name' => t('Page node creation'), 'desc' => t('Create a page node and verify its consistency in the database.') , 'group' => 'Node Tests');
-  }
-
-  function setUp() {
+    return array(
+      'name' => t('Page node creation'),
+      'desc' => t('Create a page node and verify its consistency in the database.'),
+      'group' => 'Node Tests',
+    );
   }
   
   function testPageCreation() {

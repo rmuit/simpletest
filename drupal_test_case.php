@@ -78,7 +78,7 @@ class DrupalTestCase extends WebTestCase {
   function drupalCreateContentType($settings = array()) {
     // find a non-existent random type name.
     do {
-      $name = $this->randomName(3, 'type_');
+      $name = strtolower($this->randomName(3, 'type_'));
     } while (node_get_types('type', $name));
 
     // Populate defaults array

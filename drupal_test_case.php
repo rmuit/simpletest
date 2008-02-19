@@ -451,6 +451,8 @@ class DrupalTestCase extends WebTestCase {
       menu_rebuild();
       cache_clear_all('schema', 'cache');
       module_rebuild_cache();
+    
+      $this->_modules = $this->_originalModules; 
     }
 
     foreach ($this->_cleanupVariables as $name => $value) {

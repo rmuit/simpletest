@@ -87,9 +87,6 @@ class DrupalUnitTests extends DrupalTestSuite {
       $info = $test->get_info();
       $groups[$info['group']][] = $test;
     }
-    else {
-      $groups[$class][] = $test; 
-    }
   }
   
   /**

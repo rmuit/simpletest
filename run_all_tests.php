@@ -24,6 +24,11 @@ else {
   	exit("bootstrap.inc could not be loaded\n");
   }
 }
+
+// If we are run from the command line, we need to make Drupal thing
+// we are index.php because otherwise base_path() will end up
+// including the path to this file and everything will break.
+$_SERVER['SCRIPT_NAME'] = '/index.php';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 //load simpletest files

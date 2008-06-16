@@ -19,6 +19,11 @@ define('SIMPLETEST_MINIMUM_VERSION', '1.0.1beta2');
 function simpletest_requirements($phase) {
   $requirements = array();
   $module_path = drupal_get_path('module', 'simpletest');
+  // When installing from a profile, drupal_get_path() doesn't work since
+  // the {system} table doesn't exist yet. 
+  if (empty($module_path)) {
+    $module_path =  dirname(__FILE__);
+  }
   $simpletest_path = $module_path .'/simpletest/simpletest.php';
 
   // Ensure translations don't break at install time.

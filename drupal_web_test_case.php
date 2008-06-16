@@ -60,9 +60,9 @@ class DrupalWebTestCase extends UnitTestCase {
       'taxonomy'  => NULL,
     );
     $defaults['teaser'] = $defaults['body'];
-    // If we already have a node, we use the original node's created time, and this
-    if (isset($defaults['created'])) {
-      $defaults['date'] = format_date($defaults['created'], 'custom', 'Y-m-d H:i:s O');
+    // If we already have a node, we use the original node's created time.
+    if (isset($settings['created'])) {
+      $defaults['date'] = format_date($settings['created'], 'custom', 'Y-m-d H:i:s O');
     }
     if (empty($settings['uid'])) {
       global $user;

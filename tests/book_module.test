@@ -131,9 +131,9 @@ class BookModuleTestCase extends DrupalTestCase {
       $edit['book[plid]'] = $parent;
       $this->drupalPost(NULL, $edit, 'Save');
     }
-    else
+    else {
       $this->drupalPost('node/add/book', $edit, 'Save');
-    
+    }
     // check to make sure the book node was created
     $node = node_load(array('title' => $edit['title']));
     $this->assertNotNull(($node === FALSE ? NULL : $node), 'Book node found in database.');

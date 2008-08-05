@@ -3,3 +3,4 @@ name = "SimpleTest module"
 description = "Provides simpletest classes to developers as well as some standard tests for Drupal"
 package = Simpletest
 core = 6.x
+PHP = 5.x

@@ -1,6 +1,7 @@
 ; $Id$
-name = "SimpleTest module"
-description = "Provides simpletest classes to developers as well as some standard tests for Drupal"
-package = Simpletest
+name = "SimpleTest"
+description = "Provides a framework for unit and functional testing."
+package = Other
+version = VERSION
 core = 6.x
 PHP = 5.x

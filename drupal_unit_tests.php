@@ -19,8 +19,8 @@ class DrupalTestSuite extends TestSuite {
         $this->_test_cases[$i] = &new $class();
       }
     }
-    return $this->_test_cases; 
-  } 
+    return $this->_test_cases;
+  }
 }
 
 class DrupalUnitTests extends DrupalTestSuite {
@@ -43,13 +43,16 @@ class DrupalUnitTests extends DrupalTestSuite {
           $dir = $module_path .'/tests';
           $tests = file_scan_directory($dir, '\.test$');
           $files = array_merge($files, $tests);
-        }   
-      }   
+        }
+      }
       $files = array_keys($files);
 
       $existing_classes = get_declared_classes();
       foreach ($files as $file) {
-        include_once($file);
+        if (!preg_match('/class\s+.*?\s+extends\s+DrupalWebTestCase/', file_get_contents($file))) {
+          // Ignore tests using the new format.
+          include_once($file);
+        }
       }
       $classes = array_diff(get_declared_classes(), $existing_classes);
     }
@@ -63,9 +66,7 @@ class DrupalUnitTests extends DrupalTestSuite {
     $groups = array();
     foreach ($classes as $class) {
       if (!is_subclass_of($class, 'DrupalTestCase')) {
-        if (!is_subclass_of($class, 'DrupalWebTestCase')) {
-          continue;
-        }
+        continue;
       }
       $this->_addClassToGroups($groups, $class);
     }

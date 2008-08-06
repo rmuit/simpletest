@@ -36,9 +36,7 @@ function simpletest_menu() {
  * Implementation of hook_perm().
  */
 function simpletest_perm() {
-  return array(
-    'administer unit tests' => t('Manage and run automated testing. %warning', array('%warning' => t('Warning: Give to trusted roles only; this permission has security implications.'))),
-  );
+  return array('administer unit tests');
 }
 
 /**

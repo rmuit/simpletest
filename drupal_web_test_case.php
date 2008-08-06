@@ -546,7 +546,7 @@ class DrupalWebTestCase {
     static $available;
 
     if (!isset($available) || $reset) {
-      $available = array_keys(module_invoke_all('perm'));
+      $available = module_invoke_all('perm');
     }
 
     $valid = TRUE;

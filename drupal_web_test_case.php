@@ -523,8 +523,8 @@ class DrupalWebTestCase {
     if ($role && !empty($role->rid)) {
       // Assign permissions to role and mark it for clean-up.
       db_query("INSERT INTO {permission} (rid, perm) VALUES (%d, '%s')", $role->rid, implode(', ', $permissions));
-      $count = db_result(db_query("SELECT COUNT(*) FROM {permission} WHERE rid = %d", $role->rid));
-      $this->assertTrue($count == count($permissions), t('Created permissions: @perms', array('@perms' => implode(', ', $permissions))), t('Role'));
+      $perm = db_result(db_query("SELECT perm FROM {permission} WHERE rid = %d", $role->rid));
+      $this->assertTrue(count(explode(', ', $perm)) == count($permissions), t('Created permissions: @perms', array('@perms' => implode(', ', $permissions))), t('Role'));
       return $role->rid;
     }
     else {

@@ -1,5 +1,8 @@
 // $Id$
 
+SimpleTest 6.x-2.3, xxxx-xx-xx (development version)
+------------------------------
+
 SimpleTest 6.x-2.2, 2008-08-15
 ------------------------------
 - Bugs:

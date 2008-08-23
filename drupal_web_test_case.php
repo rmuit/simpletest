@@ -733,6 +733,8 @@ class DrupalWebTestCase {
         CURLOPT_URL => $base_url,
         CURLOPT_FOLLOWLOCATION => TRUE,
         CURLOPT_RETURNTRANSFER => TRUE,
+        CURLOPT_SSL_VERIFYPEER => FALSE,
+		CURLOPT_SSL_VERIFYHOST => FALSE,
       );
       if (preg_match('/simpletest\d+/', $db_prefix)) {
         $curl_options[CURLOPT_USERAGENT] = $db_prefix;

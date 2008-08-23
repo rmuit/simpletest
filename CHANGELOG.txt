@@ -5,6 +5,7 @@ SimpleTest 6.x-2.3, xxxx-xx-xx (development version)
 - Backports:
     * #297869: Add xpath method to SimpleTest.
     * #297894: Add assertLink and assertNoLink to SimpleTest.
+    * #298137: drupalCreateContentType() should reset node permissions.
 
 SimpleTest 6.x-2.2, 2008-08-15
 ------------------------------

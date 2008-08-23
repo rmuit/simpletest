@@ -7,6 +7,7 @@ SimpleTest 6.x-2.3, xxxx-xx-xx (development version)
     * #297894: Add assertLink and assertNoLink to SimpleTest.
     * #298137: drupalCreateContentType() should reset node permissions.
     * #268148: Don't verify SSL certificates.
+    * #293099: Clarify form documentation and error handling.
 
 SimpleTest 6.x-2.2, 2008-08-15
 ------------------------------

@@ -1,6 +1,8 @@
 // $Id$
 
-SimpleTest 6.x-2.3, xxxx-xx-xx (development version)
+SimpleTest 6.x-2.4, xxxx-xx-xx (development version)
+
+SimpleTest 6.x-2.3, 2008-09-15
 ------------------------------
 - Backports:
     * #297869: Add xpath method to SimpleTest.

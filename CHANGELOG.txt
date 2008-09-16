@@ -1,6 +1,8 @@
 // $Id$
 
 SimpleTest 6.x-2.4, xxxx-xx-xx (development version)
+- Backports:
+   * #305077: Rework simpletest backend.
 
 SimpleTest 6.x-2.3, 2008-09-15
 ------------------------------

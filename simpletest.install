@@ -289,3 +289,27 @@ function simpletest_update_6001() {
 
   return $ret;
 }
+
+/**
+ * Change caller field to function.
+ */
+function simpletest_update_6002() {
+  $ret = array();
+  $schema = array();
+
+  $schema = array(
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => ''
+  );
+
+  // Clear test results to prevent odd results.
+  db_query('DELETE FROM {simpletest}');
+
+
+  db_drop_field($ret, 'simpletest', 'caller');
+  db_add_field($ret, 'simpletest', 'function', $schema);
+
+  return $ret;
+}

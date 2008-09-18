@@ -1,6 +1,8 @@
 // $Id$
 
 SimpleTest 6.x-2.4, xxxx-xx-xx (development version)
+- Bugs:
+   * #310427: settings.php check doesn't work properly.
 - Backports:
    * #305077: Rework simpletest backend.
    * #308399: The simpletest error handler is broken for PHP functions.

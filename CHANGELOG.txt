@@ -1,8 +1,10 @@
 // $Id$
 
 SimpleTest 6.x-2.5, xxxx-xx-xx (development version)
+------------------------------
 
 SimpleTest 6.x-2.4, 2008-09-22
+------------------------------
 - Bugs:
    * #310427: settings.php check doesn't work properly.
 - Backports:

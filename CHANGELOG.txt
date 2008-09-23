@@ -11,6 +11,7 @@ SimpleTest 6.x-2.4, xxxx-xx-xx (development version)
    * #295697: update cURL requirement.
    * #299186: assertFieldByXPath does not work for selects or textareas with value.
    * #308272: Improve test selection page.
+   * #255613: Update clickLink() to use drupalGet() and clean-up code.
 - Changes:
    * #310783: Fix up requirements check for settings.php.
 

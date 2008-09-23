@@ -8,6 +8,7 @@ INSTALLATION
    Windows make sure you encode the file with the UNIX standard or the
    code will not be detected.
 
+   $GLOBALS['simpletest_installed'] = TRUE;
    if (preg_match("/^simpletest\d+$/", $_SERVER['HTTP_USER_AGENT'])) {
      $db_prefix = $_SERVER['HTTP_USER_AGENT'];
    }

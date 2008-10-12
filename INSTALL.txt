@@ -41,5 +41,3 @@ INSTALLATION
    begin using the module.
 5. (Optional) Go to Administer >> Help >> SimpleTest (admin/help/simpletest)
    for more information on how to use the SimpleTest module.
-6. (Optional) Go to Administer >> Site configuration >> SimpleTest settings
-   (admin/settings/simpletest) to configure advanced settings.

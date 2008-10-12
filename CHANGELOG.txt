@@ -5,6 +5,8 @@ SimpleTest 6.x-2.5, xxxx-xx-xx (development version)
 - Backports:
    * #308668: Make test selection page work with non-JS.
    * #316344: Add meta refresh support to SimpleTest.
+- Changes:
+   * #319682: Install.txt refers to non-existent admin page.
 
 SimpleTest 6.x-2.4, 2008-09-22
 ------------------------------

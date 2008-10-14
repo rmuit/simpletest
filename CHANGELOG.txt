@@ -6,6 +6,7 @@ SimpleTest 6.x-2.5, xxxx-xx-xx (development version)
    * #308668: Make test selection page work with non-JS.
    * #316344: Add meta refresh support to SimpleTest.
    * #320127: error in drupal_web_test_case.php.
+   * #320161: drupalGetTestFiles does not sort files correctly.
 - Changes:
    * #319682: Install.txt refers to non-existent admin page.
 

@@ -8,6 +8,7 @@ SimpleTest 6.x-2.5, xxxx-xx-xx (development version)
    * #320127: error in drupal_web_test_case.php.
    * #320161: drupalGetTestFiles does not sort files correctly.
    * #320374: Simpletest now fails with max_allowed_packet = 1M.
+   * #322779: Simpletest calls file_check_directory incorrectly.
 - Changes:
    * #319682: Install.txt refers to non-existent admin page.
    * #323405: Remove bogus version = VERSION line from .info file.

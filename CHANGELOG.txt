@@ -1,6 +1,9 @@
 // $Id$
 
-SimpleTest 6.x-2.5, xxxx-xx-xx (development version)
+SimpleTest 6.x-2.6, xxxx-xx-xx (development version)
+------------------------------
+
+SimpleTest 6.x-2.5, 2008-10-22
 ------------------------------
 - Backports:
    * #308668: Make test selection page work with non-JS.

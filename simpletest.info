@@ -2,6 +2,5 @@
 name = "SimpleTest"
 description = "Provides a framework for unit and functional testing."
 package = Other
-version = VERSION
 core = 6.x
 PHP = 5.x

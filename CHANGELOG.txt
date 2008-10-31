@@ -2,6 +2,8 @@
 
 SimpleTest 6.x-2.6, xxxx-xx-xx (development version)
 ------------------------------
+- Backports:
+   * #305150: Keep running tests checked.
 
 SimpleTest 6.x-2.5, 2008-10-22
 ------------------------------

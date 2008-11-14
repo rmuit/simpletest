@@ -6,6 +6,7 @@ SimpleTest 6.x-2.6, xxxx-xx-xx (development version)
    * #305150: Keep running tests checked.
    * #313902: DX: Show fatal errors in tests. (Added to INSTALL.txt)
    * #304940: SimpleTest shouldn't try to upload non files.
+   * #308186: cURL 7.18.2 and SimpleTest module bitterly despise one another. (again?)
 
 SimpleTest 6.x-2.5, 2008-10-22
 ------------------------------

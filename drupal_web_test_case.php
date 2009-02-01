@@ -1535,8 +1535,24 @@ class DrupalWebTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  function assertTitle($title, $message, $group = 'Other') {
-    return $this->_assert($this->xpath('//title[text()="' . $title . '"]') !== FALSE, $message, $group);
+  protected function assertTitle($title, $message, $group = 'Other') {
+    return $this->assertTrue($this->xpath('//title[text()="' . $title . '"]'), $message, $group);
+  }
+
+  /**
+  * Pass if the page title is not the given string.
+  *
+  * @param $title
+  *   The string the title should not be.
+  * @param $message
+  *   Message to display.
+  * @param $group
+  *   The group this message belongs to.
+  * @return
+  *   TRUE on pass, FALSE on fail.
+  */
+  protected function assertNoTitle($title, $message, $group = 'Other') {
+    return $this->assertFalse($this->xpath('//title[text()="' . $title . '"]'), $message, $group);
   }
 
   /**

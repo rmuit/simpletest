@@ -1,6 +1,6 @@
 // $Id$
 
-SimpleTest 6.x-2.6, xxxx-xx-xx (development version)
+SimpleTest 6.x-2.6, 2009-02-07
 ------------------------------
 - Complete backport of Drupal 7.x SimpleTest module. (voids all backports).
    * Added header to all relevant files.

@@ -36,6 +36,7 @@ SimpleTest module (simpletest.module)
   * simpletest_clean_temporary_directory()
   * simpletest_test_form()
   * _drupal_decode_exception()
+  * Added hook_form_system_modules_alter()
 
 SimpleTest installer (simpletest.install)
 -----------------------------------------

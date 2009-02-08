@@ -477,11 +477,15 @@ function simpletest_get_all_tests() {
       if (is_dir($tests_directory)) {
 //        foreach (file_scan_directory($tests_directory, '/\.test$/') as $file) {
         foreach (file_scan_directory($tests_directory, '\.test$') as $file) {
-          $files[] = $file->filename;
+          // Drupal 6: Ignore 1.x style tests.
+          if (!preg_match('/class\s+.*?\s+extends\s+DrupalTestCase/', file_get_contents($file->filename))) {
+            // Ignore tests using the old format.
+            $files[] = $file->filename;
+          }
         }
       }
     }
-    
+
     $existing_classes = get_declared_classes();
     foreach ($files as $file) {
       include_once $file;

@@ -15,7 +15,8 @@ INSTALLATION
      $db_prefix = $_SERVER['HTTP_USER_AGENT'];
    }
 
-2. It is hightly recommonded, but not neccessary, that you add the following
+2. (Optional)
+   It is hightly recommonded, but not neccessary, that you add the following
    code to install.php at the beginning of install_main(). Should look like
    7.x branch of Drupal core.
 
@@ -27,7 +28,8 @@ INSTALLATION
      exit;
    }
 
-3. If there are any test modules they will be displayed on the admin modules
+3. (Optional)
+   If there are any test modules they will be displayed on the admin modules
    page (admin/build/modules) unless the following code is added to
    modules/system/system.admin.inc in system_modules() just after:
    "$files = module_rebuild_cache();".

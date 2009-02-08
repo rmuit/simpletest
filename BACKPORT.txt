@@ -45,4 +45,8 @@ SimpleTest installer (simpletest.install)
 
 JavaScript (simpletest.js)
 --------------------------
-  * Changeds function attach syntax in both behaviors.
+  * Changed function attach syntax in both behaviors.
+
+CLI script (run-tests.sh)
+-------------------------
+  * Backported database calls.

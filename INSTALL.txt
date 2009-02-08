@@ -41,9 +41,14 @@ INSTALLATION
      }
    }
 
-4. Apply the "Show fatal errors in tests" batch to misc/drupal.js if you want
+4. (Optional)
+   Apply the "Show fatal errors in tests" batch to misc/drupal.js if you want
    the reason for test failure to be displayed on the batch API screen. The
    patch can be found at: http://drupal.org/files/issues/313902-2.patch.
+
+5. (Optional)
+   Move/Copy the run-tests.sh file into the Drupal scripts folder. The script
+   allows the tests to be run from the command line.
 
 3. Go to Administer >> Site building >> Modules (admin/build/modules) and
    enable the SimpleTest module.
@@ -51,5 +56,6 @@ INSTALLATION
 4. Go to Administer >> Site building >> Testing (admin/build/testing) to
    begin using the module.
 
-5. (Optional) Go to Administer >> Help >> SimpleTest (admin/help/simpletest)
+5. (Optional)
+   Go to Administer >> Help >> SimpleTest (admin/help/simpletest)
    for more information on how to use the SimpleTest module.

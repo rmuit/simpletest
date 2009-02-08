@@ -8,6 +8,7 @@ SimpleTest 6.x-2.6, xxxx-xx-xx (development version)
    * #369952: Clarify INSTALL.txt.
    * Add drupalLogout() override.
    * Add equivilent auto-clear user code.
+   * #359577: Add run-tests.sh to 6--2 branch.
 - Backports:
    * #305150: Keep running tests checked.
    * #313902: DX: Show fatal errors in tests. (Added to INSTALL.txt)

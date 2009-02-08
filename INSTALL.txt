@@ -1,5 +1,9 @@
 $Id$
 
+AUTHOR
+------
+Jimmy Berry ("boombatower", http://drupal.org/user/214218)
+
 INSTALLATION
 ------------
 1. Add the following code to the bottom of your sites settings.php file. Make

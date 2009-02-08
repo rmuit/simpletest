@@ -8,8 +8,6 @@
  * Copyright 2008-2009 by Jimmy Berry ("boombatower", http://drupal.org/user/214218)
  */
 
-file_put_contents('output.html', ".: Log start :.\n");
-
 require_once drupal_get_path('module', 'simpletest') . '/core/drupal_web_test_case.inc';
 
 /**

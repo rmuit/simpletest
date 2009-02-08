@@ -15,7 +15,7 @@ require_once drupal_get_path('module', 'simpletest') . '/core/drupal_web_test_ca
  */
 class DrupalWebTestCase extends DrupalWebTestCaseCore {
 
-/**
+  /**
    * Internal helper: stores the assert.
    *
    * @param $status

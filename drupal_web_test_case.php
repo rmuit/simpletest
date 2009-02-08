@@ -14,7 +14,7 @@ require_once drupal_get_path('module', 'simpletest') . '/core/drupal_web_test_ca
  * Test case for typical Drupal tests.
  */
 class DrupalWebTestCase extends DrupalWebTestCaseCore {
-  
+
 /**
    * Internal helper: stores the assert.
    *
@@ -145,7 +145,23 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
     }
     return $valid;
   }
-  
+
+  /*
+   * Logs a user out of the internal browser, then check the login page to confirm logout.
+   */
+  protected function drupalLogout() {
+    // Make a request to the logout page.
+//    $this->drupalGet('user/logout');
+    $this->drupalGet('logout');
+
+    // Load the user page, the idea being if you were properly logged out you should be seeing a login screen.
+    $this->drupalGet('user');
+    $pass = $this->assertField('name', t('Username field found.'), t('Logout'));
+    $pass = $pass && $this->assertField('pass', t('Password field found.'), t('Logout'));
+
+    $this->isLoggedIn = !$pass;
+  }
+
   /**
    * Generates a random database prefix, runs the install scripts on the
    * prefixed database and enable the specified modules. After installation
@@ -166,7 +182,7 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
     // Generate temporary prefixed database to ensure that tests have a clean starting point.
 //    $db_prefix = Database::getConnection()->prefixTables('{simpletest' . mt_rand(1000, 1000000) . '}');
     $db_prefix = 'simpletest' . mt_rand(1000, 1000000);
-    
+
 //    include_once DRUPAL_ROOT . '/includes/install.inc';
     include_once './includes/install.inc';
     drupal_install_system();
@@ -179,7 +195,7 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
     $modules = array_unique(array_merge(drupal_verify_profile('default', 'en'), $args));
 //    drupal_install_modules($modules, TRUE);
     drupal_install_modules($modules);
-    
+
     // Because the schema is static cached, we need to flush
     // it between each run. If we don't, then it will contain
     // stale data for the previous run's database prefix and all
@@ -189,7 +205,7 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
     // Run default profile tasks.
     $task = 'profile';
     default_profile_tasks($task, '');
-    
+
     // Rebuild caches.
     actions_synchronize();
     _drupal_flush_css_js();
@@ -197,9 +213,10 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
     $this->checkPermissions(array(), TRUE);
 
     // Log in with a clean $user.
-//    $this->originalUser = $user;
+    $this->originalUser = $user;
 //    drupal_save_session(FALSE);
-//    $user = user_load(array('uid' => 1));
+    session_save_session(FALSE);
+    $user = user_load(array('uid' => 1));
 
     // Restore necessary variables.
     variable_set('install_profile', 'default');
@@ -214,7 +231,7 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
     file_check_directory($directory, FILE_CREATE_DIRECTORY); // Create the files directory.
     set_time_limit($this->timeLimit);
   }
-  
+
   /**
    * Delete created files and temporary files directory, delete the tables created by setUp(),
    * and reset the database prefix.
@@ -237,8 +254,9 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
       $db_prefix = $this->originalPrefix;
 
       // Return the user to the original one.
-//      $user = $this->originalUser;
+      $user = $this->originalUser;
 //      drupal_save_session(TRUE);
+      session_save_session(TRUE);
 
       // Ensure that internal logged in variable and cURL options are reset.
       $this->isLoggedIn = FALSE;

@@ -3,6 +3,7 @@
 SimpleTest 6.x-2.6, xxxx-xx-xx (development version)
 ------------------------------
 - Complete backport of Drupal 7.x SimpleTest module. (voids all backports).
+   * Added header to all relevant files.
 - Backports:
    * #305150: Keep running tests checked.
    * #313902: DX: Show fatal errors in tests. (Added to INSTALL.txt)

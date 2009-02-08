@@ -37,6 +37,11 @@ SimpleTest module (simpletest.module)
   * simpletest_test_form()
   * _drupal_decode_exception()
 
+SimpleTest installer (simpletest.install)
+-----------------------------------------
+  * Added update hooks.
+  * Added requirements check for configuration file modifications.
+
 JavaScript (simpletest.js)
 --------------------------
   * Changeds function attach syntax in both behaviors.

@@ -1,5 +1,11 @@
 <?php
 // $Id$
+/**
+ * @file
+ * Backport of Drupal 7 simpletest.module with modifications, see BACKPORT.txt.
+ *
+ * Copyright 2008-2009 by Jimmy Berry ("boombatower", http://drupal.org/user/214218)
+ */
 
 /**
  * Implementation of hook_help().

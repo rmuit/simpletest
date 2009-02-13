@@ -76,6 +76,104 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
   }
 
   /**
+   * Creates a node based on default settings.
+   *
+   * @param $settings
+   *   An associative array of settings to change from the defaults, keys are
+   *   node properties, for example 'body' => 'Hello, world!'.
+   * @return
+   *   Created node object.
+   */
+  protected function drupalCreateNode($settings = array()) {
+    // Populate defaults array
+    $defaults = array(
+      'body'      => $this->randomName(32),
+      'title'     => $this->randomName(8),
+      'comment'   => 2,
+//      'changed'   => REQUEST_TIME,
+      'changed'   => time(),
+      'format'    => FILTER_FORMAT_DEFAULT,
+      'moderate'  => 0,
+      'promote'   => 0,
+      'revision'  => 1,
+      'log'       => '',
+      'status'    => 1,
+      'sticky'    => 0,
+      'type'      => 'page',
+      'revisions' => NULL,
+      'taxonomy'  => NULL,
+    );
+    $defaults['teaser'] = $defaults['body'];
+    // If we already have a node, we use the original node's created time, and this
+    if (isset($defaults['created'])) {
+      $defaults['date'] = format_date($defaults['created'], 'custom', 'Y-m-d H:i:s O');
+    }
+    if (empty($settings['uid'])) {
+      global $user;
+      $defaults['uid'] = $user->uid;
+    }
+    $node = ($settings + $defaults);
+    $node = (object)$node;
+
+    node_save($node);
+
+    // small hack to link revisions to our test user
+    db_query('UPDATE {node_revision} SET uid = %d WHERE vid = %d', $node->uid, $node->vid);
+    return $node;
+  }
+
+  /**
+   * Creates a custom content type based on default settings.
+   *
+   * @param $settings
+   *   An array of settings to change from the defaults.
+   *   Example: 'type' => 'foo'.
+   * @return
+   *   Created content type.
+   */
+  protected function drupalCreateContentType($settings = array()) {
+    // find a non-existent random type name.
+    do {
+      $name = strtolower($this->randomName(3, 'type_'));
+    } while (node_get_types('type', $name));
+
+    // Populate defaults array
+    $defaults = array(
+      'type' => $name,
+      'name' => $name,
+      'description' => '',
+      'help' => '',
+      'min_word_count' => 0,
+      'title_label' => 'Title',
+      'body_label' => 'Body',
+      'has_title' => 1,
+      'has_body' => 1,
+    );
+    // imposed values for a custom type
+    $forced = array(
+      'orig_type' => '',
+      'old_type' => '',
+      'module' => 'node',
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    );
+    $type = $forced + $settings + $defaults;
+    $type = (object)$type;
+
+    $saved_type = node_type_save($type);
+    node_types_rebuild();
+    menu_rebuild(); // Drupal 6.
+
+    $this->assertEqual($saved_type, SAVED_NEW, t('Created content type %type.', array('%type' => $type->type)));
+
+    // Reset permissions so that permissions for this content type are available.
+    $this->checkPermissions(array(), TRUE);
+
+    return $type;
+  }
+
+  /**
    * Internal helper function; Create a role with specified permissions.
    *
    * @param $permissions

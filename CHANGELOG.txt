@@ -2,6 +2,8 @@
 
 SimpleTest 6.x-2.7, xxxx-xx-xx (development version)
 ------------------------------
+- Bugs:
+   * #372697: Content type created but not  "appearing".
 - Changes:
    * #370966: Ignore 1.x style tests.
    * Format fix.

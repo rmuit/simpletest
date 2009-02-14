@@ -4,6 +4,10 @@ AUTHOR
 ------
 Jimmy Berry ("boombatower", http://drupal.org/user/214218)
 
+REQUIREMENTS
+------------
+The php-curl library is required for SimpleTest to function.
+
 INSTALLATION
 ------------
 1. Add the following code to the bottom of your site's settings.php file. If

@@ -8,6 +8,7 @@ SimpleTest 6.x-2.7, xxxx-xx-xx (development version)
 - Changes:
    * #370966: Ignore 1.x style tests.
    * Format fix.
+   * #373172: Add curl requirement to documentation.
 
 SimpleTest 6.x-2.6, 2009-02-07
 ------------------------------

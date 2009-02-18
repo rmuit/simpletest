@@ -2,6 +2,8 @@
 
 SimpleTest 6.x-2.8, xxxx-xx-xx (development version)
 ------------------------------
+- Changes:
+   * #346844: Clear language statics to remove locale module errors.
 
 SimpleTest 6.x-2.7, 2008-02-16
 ------------------------------

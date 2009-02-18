@@ -272,12 +272,18 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
    *   List of modules to enable for the duration of the test.
    */
   protected function setUp() {
-    global $db_prefix, $user;
+    global $db_prefix, $user, $language; // $language (Drupal 6).
 
     // Store necessary current values before switching to prefixed database.
     $this->originalPrefix = $db_prefix;
     $clean_url_original = variable_get('clean_url', 0);
 
+    // Must reset locale here, since schema calls t().  (Drupal 6)
+    if (module_exists('locale')) {
+      $language = (object) array('language' => 'en', 'name' => 'English', 'native' => 'English', 'direction' => 0, 'enabled' => 1, 'plurals' => 0, 'formula' => '', 'domain' => '', 'prefix' => '', 'weight' => 0, 'javascript' => '');
+      locale(NULL, NULL, TRUE);
+    }
+    
     // Generate temporary prefixed database to ensure that tests have a clean starting point.
 //    $db_prefix = Database::getConnection()->prefixTables('{simpletest' . mt_rand(1000, 1000000) . '}');
     $db_prefix = 'simpletest' . mt_rand(1000, 1000000);
@@ -357,6 +363,12 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
 //      drupal_save_session(TRUE);
       session_save_session(TRUE);
 
+      // Bring back default language. (Drupal 6)
+      if (module_exists('locale')) {
+        drupal_init_language();
+        locale(NULL, NULL, TRUE);
+      }
+      
       // Ensure that internal logged in variable and cURL options are reset.
       $this->isLoggedIn = FALSE;
       $this->additionalCurlOptions = array();

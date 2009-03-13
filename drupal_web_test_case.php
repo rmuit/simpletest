@@ -333,6 +333,7 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
     _drupal_flush_css_js();
     $this->refreshVariables();
     $this->checkPermissions(array(), TRUE);
+    user_access(NULL, NULL, TRUE);
 
     // Log in with a clean $user.
     $this->originalUser = $user;

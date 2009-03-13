@@ -269,4 +269,21 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
   function inCURL() {
     return preg_match("/^simpletest\d+/", $_SERVER['HTTP_USER_AGENT']);
   }
+
+  /*
+   * Drupal 6.
+   */
+
+  function testUserAccess()
+  {
+    $user = $this->drupalCreateUser(array('administer unit tests'));
+    $this->assertTrue(user_access('administer unit tests', $user), 'user_access() check successfull.');
+  }
+
+  function testUserAccessCache()
+  {
+    $user = $this->drupalCreateUser(array('administer nodes'));
+    $this->assertTrue(user_access('administer nodes', $user), 'user_access() cache has been cleaned');
+
+  }
 }

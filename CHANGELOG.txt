@@ -7,6 +7,7 @@ SimpleTest 6.x-2.8, xxxx-xx-xx (development version)
 - Changes:
    * #346844: Clear language statics to remove locale module errors.
    * #400296 by carlos8f: Use "SHOW TABLES" in simpletest_get_like_tables().
+   * #390232: Update 313902-2.patch to D6.10 misc/drupal.js
 
 SimpleTest 6.x-2.7, 2008-02-16
 ------------------------------

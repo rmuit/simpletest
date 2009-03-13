@@ -48,7 +48,8 @@ INSTALLATION
 4. (Optional)
    Apply the "Show fatal errors in tests" batch to misc/drupal.js if you want
    the reason for test failure to be displayed on the batch API screen. The
-   patch can be found at: http://drupal.org/files/issues/313902-2.patch.
+   patch can be found at:
+   http://drupal.org/files/issues/simpletest_drupal.js_.patch.
 
 5. (Optional)
    Move/Copy the run-tests.sh file into the Drupal scripts folder. The script

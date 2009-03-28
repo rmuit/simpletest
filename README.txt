@@ -11,7 +11,8 @@ visit the project page at: http://drupal.org/project/simpletest.
 
 DESCRIPTION
 -----------
-SimpleTest 6.x-2.x is a backport of Drupal 7 core SimpleTest.
+SimpleTest 6.x-2.x is a backport of Drupal 7 core SimpleTest and has the same
+requirements as Drupal 7 SimpleTest.
 
 STATUS
 ------

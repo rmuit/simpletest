@@ -11,6 +11,7 @@ SimpleTest 6.x-2.8, xxxx-xx-xx (development version)
    * #390232: Update 313902-2.patch to D6.10 misc/drupal.js
    * #409372 by Dave Reid: Hide modules that have hidden = TRUE on admin/build/modules.
    * #415864: Backport sample files.
+   * #400296: Revert: Use "SHOW TABLES" in simpletest_get_like_tables().
 
 SimpleTest 6.x-2.7, 2008-02-16
 ------------------------------

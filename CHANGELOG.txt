@@ -13,6 +13,7 @@ SimpleTest 6.x-2.8, xxxx-xx-xx (development version)
    * #409372 by Dave Reid: Hide modules that have hidden = TRUE on admin/build/modules.
    * #415864: Backport sample files.
    * #400296: Revert: Use "SHOW TABLES" in simpletest_get_like_tables().
+   * #409294 by wlp1979: Add extra condition to getAssertionCall() for DrupalWebTestCaseCore.
 
 SimpleTest 6.x-2.7, 2008-02-16
 ------------------------------

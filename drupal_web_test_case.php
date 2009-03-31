@@ -76,6 +76,29 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
   }
 
   /**
+   * Cycles through backtrace until the first non-assertion method is found.
+   *
+   * @return
+   *   Array representing the true caller.
+   */
+  protected function getAssertionCall() {
+    $backtrace = debug_backtrace();
+
+    // The first element is the call. The second element is the caller.
+    // We skip calls that occurred in one of the methods of DrupalWebTestCase
+    // or in an assertion function.
+    while (($caller = $backtrace[1]) &&
+          ((isset($caller['class']) && $caller['class'] == 'DrupalWebTestCase') ||
+           (isset($caller['class']) && $caller['class'] == 'DrupalWebTestCaseCore') || // Drupal 6.
+            substr($caller['function'], 0, 6) == 'assert')) {
+      // We remove that call.
+      array_shift($backtrace);
+    }
+
+    return _drupal_get_last_caller($backtrace);
+  }
+
+  /**
    * Get a node from the database based on its title.
    *
    * @param title

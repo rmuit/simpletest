@@ -74,7 +74,7 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
     $db_prefix = $current_db_prefix;
     return $status == 'pass' ? TRUE : FALSE;
   }
-  
+
   /**
    * Get a node from the database based on its title.
    *
@@ -192,6 +192,40 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
   }
 
   /**
+   * Get a list files that can be used in tests.
+   *
+   * @param $type
+   *   File type, possible values: 'binary', 'html', 'image', 'javascript', 'php', 'sql', 'text'.
+   * @param $size
+   *   File size in bytes to match. Please check the tests/files folder.
+   * @return
+   *   List of files that match filter.
+   */
+  protected function drupalGetTestFiles($type, $size = NULL) {
+    $files = array();
+
+    // Make sure type is valid.
+    if (in_array($type, array('binary', 'html', 'image', 'javascript', 'php', 'sql', 'text'))) {
+     // Use original file directory instead of one created during setUp().
+      $path = $this->originalFileDirectory . '/simpletest';
+//      $files = file_scan_directory($path, '/' . $type . '\-.*/');
+      $files = file_scan_directory($path, '' . $type . '\-.*');
+
+      // If size is set then remove any files that are not of that size.
+      if ($size !== NULL) {
+        foreach ($files as $file) {
+          $stats = stat($file->filename);
+          if ($stats['size'] != $size) {
+            unset($files[$file->filename]);
+          }
+        }
+      }
+    }
+    usort($files, array($this, 'drupalCompareFiles'));
+    return $files;
+  }
+
+  /**
    * Internal helper function; Create a role with specified permissions.
    *
    * @param $permissions
@@ -300,7 +334,7 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
       $language = (object) array('language' => 'en', 'name' => 'English', 'native' => 'English', 'direction' => 0, 'enabled' => 1, 'plurals' => 0, 'formula' => '', 'domain' => '', 'prefix' => '', 'weight' => 0, 'javascript' => '');
       locale(NULL, NULL, TRUE);
     }
-    
+
     // Generate temporary prefixed database to ensure that tests have a clean starting point.
 //    $db_prefix = Database::getConnection()->prefixTables('{simpletest' . mt_rand(1000, 1000000) . '}');
     $db_prefix = 'simpletest' . mt_rand(1000, 1000000);
@@ -386,7 +420,7 @@ class DrupalWebTestCase extends DrupalWebTestCaseCore {
         drupal_init_language();
         locale(NULL, NULL, TRUE);
       }
-      
+
       // Ensure that internal logged in variable and cURL options are reset.
       $this->isLoggedIn = FALSE;
       $this->additionalCurlOptions = array();

@@ -5,6 +5,7 @@ SimpleTest 6.x-2.8, xxxx-xx-xx (development version)
 - Bugs:
    * #382334: drupalGetNodeByTitle uses node_load_multiple in 6.x.
    * #385152: Clear user_access() cache.
+   * Change file in drupalGetTestFiles() to use ereg() format used in Drupal 6.
 - Changes:
    * #346844: Clear language statics to remove locale module errors.
    * #400296 by carlos8f: Use "SHOW TABLES" in simpletest_get_like_tables().

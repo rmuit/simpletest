@@ -488,9 +488,12 @@ function simpletest_script_reporter_display_results() {
       'exception' => 'Exception'
     );
 
-    $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id ORDER BY test_class, message_id", array(':test_id' => $test_id));
+//    $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id ORDER BY test_class, message_id", array(':test_id' => $test_id));
+    $results = db_query("SELECT * FROM {simpletest} WHERE test_id = %d ORDER BY test_class, message_id", $test_id);
+
     $test_class = '';
-    foreach ($results as $result) {
+//    foreach ($results as $result) {
+    while ($result = db_fetch_object($results)) {
       if (isset($results_map[$result->status])) {
         if ($result->test_class != $test_class) {
           // Display test class every time results are for new test class.

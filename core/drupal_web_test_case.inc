@@ -190,7 +190,10 @@ class DrupalWebTestCaseCore {
     );
 
     // Store assertion for display after the test has completed.
-    db_insert('simpletest')->fields($assertion)->execute();
+//    db_insert('simpletest')->fields($assertion)->execute();
+    db_query("INSERT INTO {simpletest}
+              (test_id, test_class, status, message, message_group, function, line, file)
+              VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s')", array_values($assertion));
 
     // Return to testing prefix.
     $db_prefix = $current_db_prefix;
@@ -211,6 +214,7 @@ class DrupalWebTestCaseCore {
     // or in an assertion function.
     while (($caller = $backtrace[1]) &&
           ((isset($caller['class']) && $caller['class'] == 'DrupalWebTestCase') ||
+           (isset($caller['class']) && $caller['class'] == 'DrupalWebTestCaseCore') || // Drupal 6.
             substr($caller['function'], 0, 6) == 'assert')) {
       // We remove that call.
       array_shift($backtrace);
@@ -477,10 +481,11 @@ class DrupalWebTestCaseCore {
    *   A node object matching $title.
    */
   function drupalGetNodeByTitle($title) {
-    $nodes = node_load_multiple(array(), array('title' => $title));
-    // Load the first node returned from the database.
-    $returned_node = reset($nodes);
-    return $returned_node;
+//    $nodes = node_load_multiple(array(), array('title' => $title));
+//    // Load the first node returned from the database.
+//    $returned_node = reset($nodes);
+//    return $returned_node;
+    return node_load(array('title' => $title));
   }
 
   /**
@@ -498,7 +503,8 @@ class DrupalWebTestCaseCore {
       'body'      => $this->randomName(32),
       'title'     => $this->randomName(8),
       'comment'   => 2,
-      'changed'   => REQUEST_TIME,
+//      'changed'   => REQUEST_TIME,
+      'changed'   => time(),
       'format'    => FILTER_FORMAT_DEFAULT,
       'moderate'  => 0,
       'promote'   => 0,
@@ -525,7 +531,8 @@ class DrupalWebTestCaseCore {
     node_save($node);
 
     // small hack to link revisions to our test user
-    db_query('UPDATE {node_revision} SET uid = %d WHERE vid = %d', $node->uid, $node->vid);
+//    db_query('UPDATE {node_revision} SET uid = %d WHERE vid = %d', $node->uid, $node->vid);
+    db_query('UPDATE {node_revisions} SET uid = %d WHERE vid = %d', $node->uid, $node->vid);
     return $node;
   }
 
@@ -570,6 +577,7 @@ class DrupalWebTestCaseCore {
 
     $saved_type = node_type_save($type);
     node_types_rebuild();
+    menu_rebuild(); // Drupal 6.
 
     $this->assertEqual($saved_type, SAVED_NEW, t('Created content type %type.', array('%type' => $type->type)));
 
@@ -596,7 +604,8 @@ class DrupalWebTestCaseCore {
     if (in_array($type, array('binary', 'html', 'image', 'javascript', 'php', 'sql', 'text'))) {
      // Use original file directory instead of one created during setUp().
       $path = $this->originalFileDirectory . '/simpletest';
-      $files = file_scan_directory($path, '/' . $type . '\-.*/');
+//      $files = file_scan_directory($path, '/' . $type . '\-.*/');
+      $files = file_scan_directory($path, '' . $type . '\-.*');
 
       // If size is set then remove any files that are not of that size.
       if ($size !== NULL) {
@@ -709,12 +718,18 @@ class DrupalWebTestCaseCore {
     $role = db_fetch_object(db_query("SELECT * FROM {role} WHERE name = '%s'", $role_name));
     $this->assertTrue($role, t('Created role of name: @role_name, id: @rid', array('@role_name' => $role_name, '@rid' => (isset($role->rid) ? $role->rid : t('-n/a-')))), t('Role'));
     if ($role && !empty($role->rid)) {
+//      // Assign permissions to role and mark it for clean-up.
+//      foreach ($permissions as $permission_string) {
+//        db_query("INSERT INTO {role_permission} (rid, permission) VALUES (%d, '%s')", $role->rid, $permission_string);
+//      }
+//      $count = db_result(db_query("SELECT COUNT(*) FROM {role_permission} WHERE rid = %d", $role->rid));
+//      $this->assertTrue($count == count($permissions), t('Created permissions: @perms', array('@perms' => implode(', ', $permissions))), t('Role'));
+//      return $role->rid;
+
       // Assign permissions to role and mark it for clean-up.
-      foreach ($permissions as $permission_string) {
-        db_query("INSERT INTO {role_permission} (rid, permission) VALUES (%d, '%s')", $role->rid, $permission_string);
-      }
-      $count = db_result(db_query("SELECT COUNT(*) FROM {role_permission} WHERE rid = %d", $role->rid));
-      $this->assertTrue($count == count($permissions), t('Created permissions: @perms', array('@perms' => implode(', ', $permissions))), t('Role'));
+      db_query("INSERT INTO {permission} (rid, perm) VALUES (%d, '%s')", $role->rid, implode(', ', $permissions));
+      $perm = db_result(db_query("SELECT perm FROM {permission} WHERE rid = %d", $role->rid));
+      $this->assertTrue(count(explode(', ', $perm)) == count($permissions), t('Created permissions: @perms', array('@perms' => implode(', ', $permissions))), t('Role'));
       return $role->rid;
     }
     else {
@@ -736,7 +751,8 @@ class DrupalWebTestCaseCore {
     static $available;
 
     if (!isset($available) || $reset) {
-      $available = array_keys(module_invoke_all('perm'));
+//      $available = array_keys(module_invoke_all('perm'));
+      $available = module_invoke_all('perm');
     }
 
     $valid = TRUE;
@@ -799,7 +815,8 @@ class DrupalWebTestCaseCore {
    */
   protected function drupalLogout() {
     // Make a request to the logout page.
-    $this->drupalGet('user/logout');
+//    $this->drupalGet('user/logout');
+    $this->drupalGet('logout');
 
     // Load the user page, the idea being if you were properly logged out you should be seeing a login screen.
     $this->drupalGet('user');
@@ -820,24 +837,34 @@ class DrupalWebTestCaseCore {
    *   List of modules to enable for the duration of the test.
    */
   protected function setUp() {
-    global $db_prefix, $user;
+    global $db_prefix, $user, $language; // $language (Drupal 6).
 
     // Store necessary current values before switching to prefixed database.
     $this->originalPrefix = $db_prefix;
     $clean_url_original = variable_get('clean_url', 0);
 
-    // Generate temporary prefixed database to ensure that tests have a clean starting point.
-    $db_prefix = Database::getConnection()->prefixTables('{simpletest' . mt_rand(1000, 1000000) . '}');
+    // Must reset locale here, since schema calls t().  (Drupal 6)
+    if (module_exists('locale')) {
+      $language = (object) array('language' => 'en', 'name' => 'English', 'native' => 'English', 'direction' => 0, 'enabled' => 1, 'plurals' => 0, 'formula' => '', 'domain' => '', 'prefix' => '', 'weight' => 0, 'javascript' => '');
+      locale(NULL, NULL, TRUE);
+    }
 
-    include_once DRUPAL_ROOT . '/includes/install.inc';
+    // Generate temporary prefixed database to ensure that tests have a clean starting point.
+//    $db_prefix = Database::getConnection()->prefixTables('{simpletest' . mt_rand(1000, 1000000) . '}');
+    $db_prefix = 'simpletest' . mt_rand(1000, 1000000);
+
+//    include_once DRUPAL_ROOT . '/includes/install.inc';
+    include_once './includes/install.inc';
     drupal_install_system();
 
-    $this->preloadRegistry();
+//    $this->preloadRegistry();
 
     // Add the specified modules to the list of modules in the default profile.
     $args = func_get_args();
-    $modules = array_unique(array_merge(drupal_get_profile_modules('default', 'en'), $args));
-    drupal_install_modules($modules, TRUE);
+//    $modules = array_unique(array_merge(drupal_get_profile_modules('default', 'en'), $args));
+    $modules = array_unique(array_merge(drupal_verify_profile('default', 'en'), $args));
+//    drupal_install_modules($modules, TRUE);
+    drupal_install_modules($modules);
 
     // Because the schema is static cached, we need to flush
     // it between each run. If we don't, then it will contain
@@ -854,10 +881,12 @@ class DrupalWebTestCaseCore {
     _drupal_flush_css_js();
     $this->refreshVariables();
     $this->checkPermissions(array(), TRUE);
+    user_access(NULL, NULL, TRUE); // Drupal 6.
 
     // Log in with a clean $user.
     $this->originalUser = $user;
-    drupal_save_session(FALSE);
+//    drupal_save_session(FALSE);
+    session_save_session(FALSE);
     $user = user_load(array('uid' => 1));
 
     // Restore necessary variables.
@@ -925,7 +954,14 @@ class DrupalWebTestCaseCore {
 
       // Return the user to the original one.
       $user = $this->originalUser;
-      drupal_save_session(TRUE);
+//      drupal_save_session(TRUE);
+      session_save_session(TRUE);
+
+      // Bring back default language. (Drupal 6)
+      if (module_exists('locale')) {
+        drupal_init_language();
+        locale(NULL, NULL, TRUE);
+      }
 
       // Ensure that internal logged in variable and cURL options are reset.
       $this->isLoggedIn = FALSE;
@@ -934,10 +970,11 @@ class DrupalWebTestCaseCore {
       // Reload module list and implementations to ensure that test module hooks
       // aren't called after tests.
       module_list(TRUE);
-      module_implements(MODULE_IMPLEMENTS_CLEAR_CACHE);
+//      module_implements(MODULE_IMPLEMENTS_CLEAR_CACHE);
+      module_implements('', '', TRUE);
 
       // Reset the Field API.
-      field_cache_clear();
+//      field_cache_clear();
 
       // Rebuild caches.
       $this->refreshVariables();

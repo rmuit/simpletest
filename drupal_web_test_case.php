@@ -1,5 +1,6 @@
 <?php
 // $Id$
+// Core: Id: drupal_web_test_case.php,v 1.96 2009/04/22 09:57:10 dries Exp
 /**
  * @file
  * Provide required modifications to Drupal 7 core DrupalWebTestCase in order
@@ -65,11 +66,11 @@ class DrupalWebTestCase {
   protected $elements = NULL;
 
   /**
-   * Whether a user is logged in the internal browser.
+   * The current user logged in using the internal browser.
    *
    * @var bool
    */
-  protected $isLoggedIn = FALSE;
+  protected $loggedInUser = FALSE;
 
   /**
    * The current cookie file used by cURL.
@@ -158,7 +159,7 @@ class DrupalWebTestCase {
    *   the name of the source file, 'line' is the line number and 'function'
    *   is the caller function itself.
    */
-  protected function assert($status, $message = '', $group = 'Other', array $caller = NULL) {
+  private function assert($status, $message = '', $group = 'Other', array $caller = NULL) {
     global $db_prefix;
 
     // Convert boolean status to string status.
@@ -499,7 +500,7 @@ class DrupalWebTestCase {
    */
   protected function drupalCreateNode($settings = array()) {
     // Populate defaults array
-    $defaults = array(
+    $settings += array(
       'body'      => $this->randomName(32),
       'title'     => $this->randomName(8),
       'comment'   => 2,
@@ -516,18 +517,30 @@ class DrupalWebTestCase {
       'revisions' => NULL,
       'taxonomy'  => NULL,
     );
-    $defaults['teaser'] = $defaults['body'];
-    // If we already have a node, we use the original node's created time, and this
-    if (isset($defaults['created'])) {
-      $defaults['date'] = format_date($defaults['created'], 'custom', 'Y-m-d H:i:s O');
-    }
-    if (empty($settings['uid'])) {
-      global $user;
-      $defaults['uid'] = $user->uid;
-    }
-    $node = ($settings + $defaults);
-    $node = (object)$node;
 
+    // Use the original node's created time for existing nodes.
+    if (isset($settings['created']) && !isset($settings['date'])) {
+      $settings['date'] = format_date($settings['created'], 'custom', 'Y-m-d H:i:s O');
+    }
+
+    // Add the default teaser.
+    if (!isset($settings['teaser'])) {
+      $settings['teaser'] = $settings['body'];      
+    }
+
+    // If the node's user uid is not specified manually, use the currently
+    // logged in user if available, or else the user running the test.
+    if (!isset($settings['uid'])) {
+      if ($this->loggedInUser) {
+        $settings['uid'] = $this->loggedInUser->uid;
+      }
+      else {
+        global $user;
+        $settings['uid'] = $user->uid;
+      }
+    }
+
+    $node = (object) $settings;
     node_save($node);
 
     // small hack to link revisions to our test user
@@ -610,8 +623,10 @@ class DrupalWebTestCase {
       // If size is set then remove any files that are not of that size.
       if ($size !== NULL) {
         foreach ($files as $file) {
+//          $stats = stat($file->filepath);
           $stats = stat($file->filename);
           if ($stats['size'] != $size) {
+//            unset($files[$file->filepath]);
             unset($files[$file->filename]);
           }
         }
@@ -625,15 +640,15 @@ class DrupalWebTestCase {
    * Compare two files based on size and file name.
    */
   protected function drupalCompareFiles($file1, $file2) {
-    // Determine which file is larger.
-    $compare_size = (filesize($file1->filename) > filesize($file2->filename));
-    if (!$compare_size) {
-      // Both files were the same size, so return whichever one is alphabetically greater.
-      return strnatcmp($file1->name, $file2->name);
+//    $compare_size = filesize($file1->filepath) - filesize($file2->filepath);
+    $compare_size = filesize($file1->filename) - filesize($file2->filename);
+    if ($compare_size) {
+      // Sort by file size.
+      return $compare_size;
     }
     else {
-      // Return TRUE if $file1 is larger than $file2.
-      return $compare_size;
+      // The files were the same size, so sort alphabetically.
+      return strnatcmp($file1->name, $file2->name);
     }
   }
 
@@ -793,7 +808,7 @@ class DrupalWebTestCase {
    * @see drupalCreateUser()
    */
   protected function drupalLogin(stdClass $user) {
-    if ($this->isLoggedIn) {
+    if ($this->loggedInUser) {
       $this->drupalLogout();
     }
 
@@ -807,7 +822,9 @@ class DrupalWebTestCase {
     $pass = $pass && $this->assertNoText(t('The username %name has been blocked.', array('%name' => $user->name)), t('No blocked message at login page'), t('User login'));
     $pass = $pass && $this->assertNoText(t('The name %name is a reserved username.', array('%name' => $user->name)), t('No reserved message at login page'), t('User login'));
 
-    $this->isLoggedIn = $pass;
+    if ($pass) {
+      $this->loggedInUser = $user;
+    }
   }
 
   /*
@@ -823,7 +840,9 @@ class DrupalWebTestCase {
     $pass = $this->assertField('name', t('Username field found.'), t('Logout'));
     $pass = $pass && $this->assertField('pass', t('Password field found.'), t('Logout'));
 
-    $this->isLoggedIn = !$pass;
+    if ($pass) {
+      $this->loggedInUser = FALSE;
+    }
   }
 
   /**
@@ -886,6 +905,7 @@ class DrupalWebTestCase {
     // Log in with a clean $user.
     $this->originalUser = $user;
 //    drupal_save_session(FALSE);
+//    $user = user_load(1);
     session_save_session(FALSE);
     $user = user_load(array('uid' => 1));
 
@@ -899,7 +919,9 @@ class DrupalWebTestCase {
     $this->originalFileDirectory = file_directory_path();
     variable_set('file_directory_path', file_directory_path() . '/' . $db_prefix);
     $directory = file_directory_path();
-    file_check_directory($directory, FILE_CREATE_DIRECTORY); // Create the files directory.
+    // Create the files directory.
+    file_check_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+
     set_time_limit($this->timeLimit);
   }
 
@@ -939,6 +961,7 @@ class DrupalWebTestCase {
     global $db_prefix, $user;
     if (preg_match('/simpletest\d+/', $db_prefix)) {
       // Delete temporary files directory and reset files directory path.
+//      file_unmanaged_delete_recursive(file_directory_path());
       simpletest_clean_temporary_directory(file_directory_path());
       variable_set('file_directory_path', $this->originalFileDirectory);
 
@@ -964,7 +987,7 @@ class DrupalWebTestCase {
       }
 
       // Ensure that internal logged in variable and cURL options are reset.
-      $this->isLoggedIn = FALSE;
+      $this->loggedInUser = FALSE;
       $this->additionalCurlOptions = array();
 
       // Reload module list and implementations to ensure that test module hooks
@@ -999,6 +1022,7 @@ class DrupalWebTestCase {
         CURLOPT_COOKIEJAR => $this->cookieFile,
         CURLOPT_URL => $base_url,
         CURLOPT_FOLLOWLOCATION => TRUE,
+        CURLOPT_MAXREDIRS => 5,
         CURLOPT_RETURNTRANSFER => TRUE,
         CURLOPT_SSL_VERIFYPEER => FALSE,  // Required to make the tests run on https://
         CURLOPT_SSL_VERIFYHOST => FALSE,  // Required to make the tests run on https://
@@ -1028,10 +1052,25 @@ class DrupalWebTestCase {
   protected function curlExec($curl_options) {
     $this->curlInitialize();
     $url = empty($curl_options[CURLOPT_URL]) ? curl_getinfo($this->curlHandle, CURLINFO_EFFECTIVE_URL) : $curl_options[CURLOPT_URL];
+    if (!empty($curl_options[CURLOPT_POST])) {
+      // This is a fix for the Curl library to prevent Expect: 100-continue
+      // headers in POST requests, that may cause unexpected HTTP response
+      // codes from some webservers (like lighttpd that returns a 417 error
+      // code). It is done by setting an empty "Expect" header field that is
+      // not overwritten by Curl.
+      $curl_options[CURLOPT_HTTPHEADER][] = 'Expect:';
+    }
     curl_setopt_array($this->curlHandle, $this->additionalCurlOptions + $curl_options);
     $this->headers = array();
     $this->drupalSetContent(curl_exec($this->curlHandle), curl_getinfo($this->curlHandle, CURLINFO_EFFECTIVE_URL));
-    $this->assertTrue($this->content !== FALSE, t('!method to !url, response is !length bytes.', array('!method' => !empty($curl_options[CURLOPT_NOBODY]) ? 'HEAD' : (empty($curl_options[CURLOPT_POSTFIELDS]) ? 'GET' : 'POST'), '!url' => $url, '!length' => strlen($this->content))), t('Browser'));
+    $message_vars = array(
+      '!method' => !empty($curl_options[CURLOPT_NOBODY]) ? 'HEAD' : (empty($curl_options[CURLOPT_POSTFIELDS]) ? 'GET' : 'POST'),
+      '@url' => $url,
+      '@status' => curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE),
+      '!length' => format_size(strlen($this->content))
+    );
+    $message = t('!method @url returned @status (!length).', $message_vars);
+    $this->assertTrue($this->content !== FALSE, $message, t('Browser'));
     return $this->drupalGetContent();
   }
 
@@ -1743,6 +1782,78 @@ class DrupalWebTestCase {
   }
 
   /**
+   * Pass if the text is found ONLY ONCE on the text version of the page.
+   *
+   * The text version is the equivalent of what a user would see when viewing
+   * through a web browser. In other words the HTML has been filtered out of
+   * the contents.
+   *
+   * @param $text
+   *   Plain text to look for.
+   * @param $message
+   *   Message to display.
+   * @param $group
+   *   The group this message belongs to, defaults to 'Other'.
+   * @return
+   *   TRUE on pass, FALSE on fail.
+   */
+  protected function assertUniqueText($text, $message = '', $group = 'Other') {
+    return $this->assertUniqueTextHelper($text, $message, $group, TRUE);
+  }
+
+  /**
+   * Pass if the text is found MORE THAN ONCE on the text version of the page.
+   *
+   * The text version is the equivalent of what a user would see when viewing
+   * through a web browser. In other words the HTML has been filtered out of
+   * the contents.
+   *
+   * @param $text
+   *   Plain text to look for.
+   * @param $message
+   *   Message to display.
+   * @param $group
+   *   The group this message belongs to, defaults to 'Other'.
+   * @return
+   *   TRUE on pass, FALSE on fail.
+   */
+  protected function assertNoUniqueText($text, $message = '', $group = 'Other') {
+    return $this->assertUniqueTextHelper($text, $message, $group, FALSE);
+  }
+
+  /**
+   * Helper for assertUniqueText and assertNoUniqueText.
+   *
+   * It is not recommended to call this function directly.
+   *
+   * @param $text
+   *   Plain text to look for.
+   * @param $message
+   *   Message to display.
+   * @param $group
+   *   The group this message belongs to.
+   * @param $be_unique
+   *   TRUE if this text should be found only once, FALSE if it should be found more than once.
+   * @return
+   *   TRUE on pass, FALSE on fail.
+   */
+  protected function assertUniqueTextHelper($text, $message, $group, $be_unique) {
+    if ($this->plainTextContent === FALSE) {
+      $this->plainTextContent = filter_xss($this->content, array());
+    }
+    if (!$message) {
+      $message = '"' . $text . '"'. ($be_unique ? ' found only once' : ' found more than once');
+    }
+    $first_occurance = strpos($this->plainTextContent, $text);
+    if ($first_occurance === FALSE) {
+      return $this->assert(FALSE, $message, $group);
+    }
+    $offset = $first_occurance + strlen($text);
+    $second_occurance = strpos($this->plainTextContent, $text, $offset);
+    return $this->assert($be_unique == ($second_occurance === FALSE), $message, $group);
+  }
+
+  /**
    * Will trigger a pass if the Perl regex pattern is found in the raw content.
    *
    * @param $pattern
@@ -1787,7 +1898,7 @@ class DrupalWebTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertTitle($title, $message, $group = 'Other') {
-    return $this->assertTrue($this->xpath('//title[text()="' . $title . '"]'), $message, $group);
+    return $this->assertEqual(current($this->xpath('//title')), $title, $message, $group);
   }
 
   /**
@@ -1803,7 +1914,7 @@ class DrupalWebTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertNoTitle($title, $message, $group = 'Other') {
-    return $this->assertFalse($this->xpath('//title[text()="' . $title . '"]'), $message, $group);
+    return $this->assertNotEqual(current($this->xpath('//title')), $title, $message, $group);
   }
 
   /**
@@ -2043,58 +2154,5 @@ class DrupalWebTestCase {
     $curl_code = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
     $match = is_array($code) ? in_array($curl_code, $code) : $curl_code == $code;
     return $this->assertTrue($match, $message ? $message : t('HTTP response expected !code, actual !curl_code', array('!code' => $code, '!curl_code' => $curl_code)), t('Browser'));
-  }
-  
-  /**
-   * TODO write documentation.
-   * @param $type
-   * @param $field_name
-   * @param $settings
-   * @return unknown_type
-   */
-  protected function drupalCreateField($type, $field_name = NULL, $settings = array()) {
-    if (!isset($field_name)) {
-      $field_name = strtolower($this->randomName());
-    }
-    $field_definition = array(
-      'field_name' => $field_name,
-      'type' => $type,
-    );
-    $field_definition += $settings;
-    field_create_field($field_definition);
-    
-    $field = field_read_field($field_name);
-    $this->assertTrue($field, t('Created field @field_name of type @type.', array('@field_name' => $field_name, '@type' => $type)));
-    
-    return $field;
-  }
-  
-  /**
-   * TODO write documentation.
-   * @param $field_name
-   * @param $widget_type
-   * @param $display_type
-   * @param $bundle
-   * @return unknown_type
-   */
-  protected function drupalCreateFieldInstance($field_name, $widget_type, $formatter_type, $bundle) {
-    $instance_definition = array(
-      'field_name' => $field_name,
-      'bundle' => $bundle,
-      'widget' => array(
-        'type' => $widget_type,
-      ),
-      'display' => array(
-        'full' => array(
-          'type' => $formatter_type,
-        ),
-      ),
-    );
-    field_create_instance($instance_definition);
-    
-    $instance = field_read_instance($field_name, $bundle);
-    $this->assertTrue($instance, t('Created instance of field @field_name on bundle @bundle.', array('@field_name' => $field_name, '@bundle' => $bundle)));
-    
-    return $instance;
   }
 }

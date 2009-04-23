@@ -1,5 +1,6 @@
 <?php
 // $Id$
+// Core: Id: common.inc,v 1.878 2009/04/22 09:45:02 dries Exp
 /**
  * @file
  * Provide backported function from Drupal 7 core required by SimpleTest.
@@ -167,7 +168,7 @@ function _drupal_log_error($error, $fatal = FALSE) {
   }
 
   if ($fatal) {
-    drupal_set_header($_SERVER['SERVER_PROTOCOL'] . ' Service unavailable');
+    drupal_set_header('503 Service unavailable');
     drupal_set_title(t('Error'));
     if (!defined('MAINTENANCE_MODE') && drupal_get_bootstrap_phase() == DRUPAL_BOOTSTRAP_FULL) {
       // To conserve CPU and bandwidth, omit the blocks.

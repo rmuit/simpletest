@@ -1,5 +1,6 @@
 <?php
 // $Id$
+// Core: Id: simpletest.test,v 1.17 2009/03/31 01:49:53 webchick Exp
 /**
  * @file
  * Backport of Drupal 7 simpletest.test with modifications, see BACKPORT.txt.
@@ -19,7 +20,7 @@ class SimpleTestFunctionalTest extends DrupalWebTestCase {
    */
   protected $test_ids = array();
 
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => t('SimpleTest functionality'),
       'description' => t('Test SimpleTest\'s web interface: check that the intended tests were

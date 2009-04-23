@@ -2,5 +2,7 @@
 name = "SimpleTest"
 description = "Provides a framework for unit and functional testing."
 package = Development
-core = 6.x
-PHP = 5.x
+version = VERSION
+core = 7.x
+files[] = simpletest.module
+files[] = simpletest.install

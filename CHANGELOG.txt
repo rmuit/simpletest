@@ -18,6 +18,7 @@ SimpleTest 6.x-2.8, xxxx-xx-xx (development version)
    * #409294 by wlp1979: Add extra condition to getAssertionCall() for DrupalWebTestCaseCore.
    * Merge DrupalWebTestCase change into DrupalWebTestCaseCore.
    * Move "core" directory files into root.
+   * #442436: Full backport of Drupal 7 SimpleTest and common.inc functions.
 
 SimpleTest 6.x-2.7, 2009-02-16
 ------------------------------

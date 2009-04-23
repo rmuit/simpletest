@@ -11,7 +11,7 @@ class BlockTestCase extends DrupalWebTestCase {
   /**
    * Implementation of getInfo().
    */
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => t('Block functionality'),
       'description' => t('Add, edit and delete custom block. Configure and move a module-defined block.'),

@@ -4,6 +4,9 @@ SimpleTest 6.x-2.9, xxxx-xx-xx (development version)
 ------------------------------
 - Bugs:
    * #442890: HEAD info left in simpletest.info.
+- Backports:
+   * #335756: SimpleTest: $this->originalFileDirectory should be set before
+              installation to ensure non-standard directories are picked up.
 
 SimpleTest 6.x-2.8, 2009-04-23
 ------------------------------

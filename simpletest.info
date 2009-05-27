@@ -2,7 +2,6 @@
 name = "SimpleTest"
 description = "Provides a framework for unit and functional testing."
 package = Development
-version = VERSION
 core = 6.x
 files[] = simpletest.module
 files[] = simpletest.install

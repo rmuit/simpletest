@@ -4,6 +4,7 @@ SimpleTest 6.x-2.9, xxxx-xx-xx (development version)
 ------------------------------
 - Bugs:
    * #442890: HEAD info left in simpletest.info.
+   * #474394 by RockyRoad: block.test should treat delta as string.
 - Backports:
    * #335756: SimpleTest: $this->originalFileDirectory should be set before
               installation to ensure non-standard directories are picked up.

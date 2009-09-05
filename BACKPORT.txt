@@ -41,7 +41,7 @@ SimpleTest module (simpletest.module)
 
 SimpleTest installer (simpletest.install)
 -----------------------------------------
-  * Added update hooks.
+  * Added update hook.
   * Added requirements check for configuration file modifications.
 
 JavaScript (simpletest.js)

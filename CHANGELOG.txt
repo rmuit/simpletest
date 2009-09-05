@@ -8,6 +8,7 @@ SimpleTest 6.x-2.9, xxxx-xx-xx (development version)
 - Backports:
    * #335756: SimpleTest: $this->originalFileDirectory should be set before
               installation to ensure non-standard directories are picked up.
+   * #567422: Fresh backport of Drupal 7 SimpleTest.
 
 SimpleTest 6.x-2.8, 2009-04-23
 ------------------------------

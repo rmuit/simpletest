@@ -4,7 +4,7 @@ RCS file: /cvs/drupal/drupal/includes/bootstrap.inc,v
 retrieving revision 1.206.2.12
 diff -u -r1.206.2.12 bootstrap.inc
 --- includes/bootstrap.inc	30 Apr 2009 00:13:30 -0000	1.206.2.12
-+++ includes/bootstrap.inc	5 Sep 2009 13:08:48 -0000
++++ includes/bootstrap.inc	5 Sep 2009 13:43:54 -0000
 @@ -985,7 +985,7 @@
  }
  
@@ -85,7 +85,7 @@ RCS file: /cvs/drupal/drupal/includes/common.inc,v
 retrieving revision 1.756.2.62
 diff -u -r1.756.2.62 common.inc
 --- includes/common.inc	10 Aug 2009 10:56:34 -0000	1.756.2.62
-+++ includes/common.inc	5 Sep 2009 13:08:49 -0000
++++ includes/common.inc	5 Sep 2009 13:43:55 -0000
 @@ -2585,6 +2585,15 @@
    unicode_check();
    // Undo magic quotes
@@ -102,10 +102,25 @@ diff -u -r1.756.2.62 common.inc
    // Load all enabled modules
    module_load_all();
    // Let all modules take action before menu system handles the request
-@@ -3702,3 +3711,247 @@
+@@ -3702,3 +3711,262 @@
    }
    variable_set('css_js_query_string', $new_character . substr($string_history, 0, 19));
  }
++
++/**
++ * Error reporting level: display no errors.
++ */
++define('ERROR_REPORTING_HIDE', 0);
++
++/**
++ * Error reporting level: display errors and warnings.
++ */
++define('ERROR_REPORTING_DISPLAY_SOME', 1);
++
++/**
++ * Error reporting level: display all messages.
++ */
++define('ERROR_REPORTING_DISPLAY_ALL', 2);
 +
 +/**
 + * Custom PHP error handler.

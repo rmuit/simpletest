@@ -2,10 +2,10 @@ Index: includes/bootstrap.inc
 ===================================================================
 RCS file: /cvs/drupal/drupal/includes/bootstrap.inc,v
 retrieving revision 1.206.2.12
-diff -u -r1.206.2.12 bootstrap.inc
+diff -u -p -r1.206.2.12 bootstrap.inc
 --- includes/bootstrap.inc	30 Apr 2009 00:13:30 -0000	1.206.2.12
-+++ includes/bootstrap.inc	5 Sep 2009 13:43:54 -0000
-@@ -985,7 +985,7 @@
++++ includes/bootstrap.inc	13 Sep 2009 20:43:54 -0000
+@@ -985,7 +985,7 @@ function drupal_bootstrap($phase) {
  }
  
  function _drupal_bootstrap($phase) {
@@ -14,13 +14,14 @@ diff -u -r1.206.2.12 bootstrap.inc
  
    switch ($phase) {
  
-@@ -1011,6 +1011,17 @@
+@@ -1011,6 +1011,18 @@ function _drupal_bootstrap($phase) {
        break;
  
      case DRUPAL_BOOTSTRAP_DATABASE:
 +      // The user agent header is used to pass a database prefix in the request when
 +      // running tests. However, for security reasons, it is imperative that we
 +      // validate we ourselves made the request.
++      $GLOBALS['simpletest_installed'] = TRUE;
 +      if (isset($_SERVER['HTTP_USER_AGENT']) && (strpos($_SERVER['HTTP_USER_AGENT'], "simpletest") !== FALSE) && !drupal_valid_test_ua($_SERVER['HTTP_USER_AGENT'])) {
 +        header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
 +        exit;
@@ -32,7 +33,7 @@ diff -u -r1.206.2.12 bootstrap.inc
        // Initialize the default database.
        require_once './includes/database.inc';
        db_set_active();
-@@ -1199,3 +1210,46 @@
+@@ -1199,3 +1211,46 @@ function ip_address() {
  
    return $ip_address;
  }
@@ -83,10 +84,10 @@ Index: includes/common.inc
 ===================================================================
 RCS file: /cvs/drupal/drupal/includes/common.inc,v
 retrieving revision 1.756.2.62
-diff -u -r1.756.2.62 common.inc
+diff -u -p -r1.756.2.62 common.inc
 --- includes/common.inc	10 Aug 2009 10:56:34 -0000	1.756.2.62
-+++ includes/common.inc	5 Sep 2009 13:43:55 -0000
-@@ -2585,6 +2585,15 @@
++++ includes/common.inc	13 Sep 2009 20:43:55 -0000
+@@ -2585,6 +2585,15 @@ function _drupal_bootstrap_full() {
    unicode_check();
    // Undo magic quotes
    fix_gpc_magic();
@@ -102,7 +103,7 @@ diff -u -r1.756.2.62 common.inc
    // Load all enabled modules
    module_load_all();
    // Let all modules take action before menu system handles the request
-@@ -3702,3 +3711,262 @@
+@@ -3702,3 +3711,262 @@ function _drupal_flush_css_js() {
    }
    variable_set('css_js_query_string', $new_character . substr($string_history, 0, 19));
  }

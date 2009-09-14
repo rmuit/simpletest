@@ -1169,7 +1169,8 @@ class DrupalWebTestCase extends DrupalTestCase {
 //    $language = language_default();
 
     // Use the test mail class instead of the default mail handler class.
-    variable_set('mail_sending_system', array('default-system' => 'TestingMailSystem'));
+//    variable_set('mail_sending_system', array('default-system' => 'TestingMailSystem'));
+    variable_set('smtp_library', drupal_get_path('module', 'simpletest') . '/drupal_web_test_case.php');
 
     // Use temporary files directory with the same prefix as the database.
 //    $public_files_directory  = $this->originalFileDirectory . '/' . $db_prefix;
@@ -2001,7 +2002,8 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     foreach ($captured_emails as $message) {
       foreach ($filter as $key => $value) {
-        if (!isset($message[$key]) || $message[$key] != $value) {
+//        if (!isset($message[$key]) || $message[$key] != $value) {
+        if (!isset($message['params'][$key]) || $message['params'][$key] != $value) {
           continue 2;
         }
       }
@@ -2555,7 +2557,8 @@ class DrupalWebTestCase extends DrupalTestCase {
   protected function assertMail($name, $value = '', $message = '') {
     $captured_emails = variable_get('drupal_test_email_collector', array());
     $email = end($captured_emails);
-    return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('E-mail'));
+//    return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('E-mail'));
+    return $this->assertTrue($email && isset($email['params'][$name]) && $email['params'][$name] == $value, $message, t('E-mail'));
   }
 
   /**
@@ -2619,4 +2622,18 @@ function simpletest_verbose($message, $original_file_directory = NULL, $test_cla
     return file_check_directory($directory, FILE_CREATE_DIRECTORY);
   }
   return FALSE;
+}
+
+/**
+ * Capture e-mail message during testing, from TestingMailSystem in
+ * mail.sending.inc.
+ *
+ * @param $message
+ *   An e-mail message.
+ */
+function drupal_mail_wrapper(array $message) {
+  $captured_emails = variable_get('drupal_test_email_collector', array());
+  $captured_emails[] = $message;
+  variable_set('drupal_test_email_collector', $captured_emails);
+  return TRUE;
 }

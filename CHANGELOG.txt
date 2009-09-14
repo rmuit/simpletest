@@ -17,6 +17,7 @@ SimpleTest 6.x-2.9, 2009-09-14
    * #567422: Fresh backport of Drupal 7 SimpleTest.
    * #545228: Missing D7 constants.
    * Remove simpletest.function.inc.
+   * Correct file_scan_directory() $mask parameter API change.
 
 SimpleTest 6.x-2.8, 2009-04-23
 ------------------------------

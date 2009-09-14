@@ -39,14 +39,16 @@ function simpletest_install() {
 
     // Copy other test files for consistency.
     $original = drupal_get_path('module', 'simpletest') . '/files';
-    $files = file_scan_directory($original, '/(html|image|javascript|php|sql)-.*/');
+//    $files = file_scan_directory($original, '/(html|image|javascript|php|sql)-.*/');
+    $files = file_scan_directory($original, '(html|image|javascript|php|sql)-.*');
 
     // If there are more files in SimpleTest's files directory than the site's
     // files directory, restore all the files. This situation might occur when
     // an errant test deletes one or more files from the site's files
     // directory. It serves a convenience to developers so that they can get
     // the test files back easily.
-    if (count($files) > count(file_scan_directory($path, '/(html|image|javascript|php|sql)-.*/'))) {
+//    if (count($files) > count(file_scan_directory($path, '/(html|image|javascript|php|sql)-.*/'))) {
+    if (count($files) > count(file_scan_directory($path, '(html|image|javascript|php|sql)-.*'))) {
       foreach ($files as $file) {
 //        file_unmanaged_copy($file->uri, $path, FILE_EXISTS_REPLACE);
         copy($file->filename, $path . '/' . $file->basename);
@@ -121,7 +123,8 @@ function simpletest_uninstall() {
 
   // Remove generated files.
   $path = file_directory_path() . '/simpletest';
-  $files = file_scan_directory($path, '/.*/');
+//  $files = file_scan_directory($path, '/.*/');
+  $files = file_scan_directory($path, '.*');
   foreach ($files as $file) {
 //    file_unmanaged_delete($file->uri);
     unlink($file->filename);

@@ -1,93 +1,33 @@
-Index: includes/bootstrap.inc
+Index: install.php
 ===================================================================
-RCS file: /cvs/drupal/drupal/includes/bootstrap.inc,v
-retrieving revision 1.206.2.12
-diff -u -p -r1.206.2.12 bootstrap.inc
---- includes/bootstrap.inc	30 Apr 2009 00:13:30 -0000	1.206.2.12
-+++ includes/bootstrap.inc	13 Sep 2009 20:43:54 -0000
-@@ -985,7 +985,7 @@ function drupal_bootstrap($phase) {
- }
+RCS file: /cvs/drupal/drupal/install.php,v
+retrieving revision 1.113.2.9
+diff -u -r1.113.2.9 install.php
+--- install.php 27 Apr 2009 10:50:35 -0000  1.113.2.9
++++ install.php 14 Sep 2009 23:07:46 -0000
+@@ -20,6 +20,14 @@
+   require_once './includes/bootstrap.inc';
+   drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
  
- function _drupal_bootstrap($phase) {
--  global $conf;
-+  global $conf, $db_prefix;
- 
-   switch ($phase) {
- 
-@@ -1011,6 +1011,18 @@ function _drupal_bootstrap($phase) {
-       break;
- 
-     case DRUPAL_BOOTSTRAP_DATABASE:
-+      // The user agent header is used to pass a database prefix in the request when
-+      // running tests. However, for security reasons, it is imperative that we
-+      // validate we ourselves made the request.
-+      $GLOBALS['simpletest_installed'] = TRUE;
-+      if (isset($_SERVER['HTTP_USER_AGENT']) && (strpos($_SERVER['HTTP_USER_AGENT'], "simpletest") !== FALSE) && !drupal_valid_test_ua($_SERVER['HTTP_USER_AGENT'])) {
-+        header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
-+        exit;
-+      }
-+      if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match("/^(simpletest\d+);/", $_SERVER['HTTP_USER_AGENT'], $matches)) {
-+        $db_prefix .= $matches[1];
-+      }
-+
-       // Initialize the default database.
-       require_once './includes/database.inc';
-       db_set_active();
-@@ -1199,3 +1211,46 @@ function ip_address() {
- 
-   return $ip_address;
- }
-+
-+/**
-+ * Validate the HMAC and timestamp of a user agent header from simpletest.
-+ */
-+function drupal_valid_test_ua($user_agent) {
-+//  global $dbatabases;
-+  global $db_url;
-+
-+  list($prefix, $time, $salt, $hmac) = explode(';', $user_agent);
-+  $check_string =  $prefix . ';' . $time . ';' . $salt;
-+  // We use the database credentials from settings.php to make the HMAC key, since
-+  // the database is not yet initialized and we can't access any Drupal variables.
-+  // The file properties add more entropy not easily accessible to others.
-+//  $filepath = DRUPAL_ROOT . '/includes/bootstrap.inc';
-+  $filepath = './includes/bootstrap.inc';
-+//  $key = sha1(serialize($databases) . filectime($filepath) . fileinode($filepath), TRUE);
-+  $key = sha1(serialize($db_url) . filectime($filepath) . fileinode($filepath), TRUE);
-+  // The HMAC must match.
-+  return $hmac == base64_encode(hash_hmac('sha1', $check_string, $key, TRUE));
-+}
-+
-+/**
-+ * Generate a user agent string with a HMAC and timestamp for simpletest.
-+ */
-+function drupal_generate_test_ua($prefix) {
-+//  global $dbatabases;
-+  global $db_url;
-+  static $key;
-+
-+  if (!isset($key)) {
-+    // We use the database credentials to make the HMAC key, since we
-+    // check the HMAC before the database is initialized. filectime()
-+    // and fileinode() are not easily determined from remote.
-+//    $filepath = DRUPAL_ROOT . '/includes/bootstrap.inc';
-+    $filepath = './includes/bootstrap.inc';
-+//    $key = sha1(serialize($databases) . filectime($filepath) . fileinode($filepath), TRUE);
-+    $key = sha1(serialize($db_url) . filectime($filepath) . fileinode($filepath), TRUE);
++  // The user agent header is used to pass a database prefix in the request when
++  // running tests. However, for security reasons, it is imperative that no
++  // installation be permitted using such a prefix.
++  if (isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], "simpletest") !== FALSE) {
++    header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
++    exit;
 +  }
-+   // Generate a moderately secure HMAC based on the database credentials.
-+   $salt = uniqid('', TRUE);
-+   $check_string = $prefix . ';' . time() . ';' . $salt;
-+   return  $check_string . ';' . base64_encode(hash_hmac('sha1', $check_string, $key, TRUE));
-+}
++
+   // This must go after drupal_bootstrap(), which unsets globals!
+   global $profile, $install_locale, $conf;
+ 
 Index: includes/common.inc
 ===================================================================
 RCS file: /cvs/drupal/drupal/includes/common.inc,v
 retrieving revision 1.756.2.62
-diff -u -p -r1.756.2.62 common.inc
---- includes/common.inc	10 Aug 2009 10:56:34 -0000	1.756.2.62
-+++ includes/common.inc	13 Sep 2009 20:43:55 -0000
-@@ -2585,6 +2585,15 @@ function _drupal_bootstrap_full() {
+diff -u -r1.756.2.62 common.inc
+--- includes/common.inc 10 Aug 2009 10:56:34 -0000  1.756.2.62
++++ includes/common.inc 14 Sep 2009 23:07:47 -0000
+@@ -2585,6 +2585,15 @@
    unicode_check();
    // Undo magic quotes
    fix_gpc_magic();
@@ -103,7 +43,7 @@ diff -u -p -r1.756.2.62 common.inc
    // Load all enabled modules
    module_load_all();
    // Let all modules take action before menu system handles the request
-@@ -3702,3 +3711,262 @@ function _drupal_flush_css_js() {
+@@ -3702,3 +3711,262 @@
    }
    variable_set('css_js_query_string', $new_character . substr($string_history, 0, 19));
  }

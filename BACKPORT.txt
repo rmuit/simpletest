@@ -23,10 +23,6 @@ DrupalWebTestCase
 -----------------
 Document as described above.
 
-Error/Exception handling (simpletest.function.inc)
----------------------------------------------
-The necessary core error/exception handling function from common.inc.
-
 SimpleTest module (simpletest.module)
 -------------------------------------
   * simpletest_get_all_tests()

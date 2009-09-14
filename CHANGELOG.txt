@@ -21,6 +21,7 @@ SimpleTest 6.x-2.9, 2009-09-14
    * Correct another 'class' atrribute as array().
    * Update files.
    * Changes to install.php included in D6 core patch.
+   * #577496: drupal_mail_wrapper() conflicts.
 
 SimpleTest 6.x-2.8, 2009-04-23
 ------------------------------

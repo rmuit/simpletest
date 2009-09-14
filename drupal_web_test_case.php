@@ -1170,7 +1170,7 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Use the test mail class instead of the default mail handler class.
 //    variable_set('mail_sending_system', array('default-system' => 'TestingMailSystem'));
-    variable_set('smtp_library', drupal_get_path('module', 'simpletest') . '/drupal_web_test_case.php');
+    variable_set('smtp_library', drupal_get_path('module', 'simpletest') . '/simpletest.test');
 
     // Use temporary files directory with the same prefix as the database.
 //    $public_files_directory  = $this->originalFileDirectory . '/' . $db_prefix;
@@ -2622,18 +2622,4 @@ function simpletest_verbose($message, $original_file_directory = NULL, $test_cla
     return file_check_directory($directory, FILE_CREATE_DIRECTORY);
   }
   return FALSE;
-}
-
-/**
- * Capture e-mail message during testing, from TestingMailSystem in
- * mail.sending.inc.
- *
- * @param $message
- *   An e-mail message.
- */
-function drupal_mail_wrapper(array $message) {
-  $captured_emails = variable_get('drupal_test_email_collector', array());
-  $captured_emails[] = $message;
-  variable_set('drupal_test_email_collector', $captured_emails);
-  return TRUE;
 }

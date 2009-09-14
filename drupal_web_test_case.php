@@ -1083,7 +1083,8 @@ class DrupalWebTestCase extends DrupalTestCase {
 //    $db_prefix_new = Database::getConnection()->prefixTables('{simpletest' . mt_rand(1000, 1000000) . '}');
     $db_prefix_new = $db_prefix . 'simpletest' . mt_rand(1000, 1000000);
 
-    // Workaround to insure we init the theme layer before going into $prefix land; helps run-test.sh function.
+    // Workaround to insure we init the theme layer before going into prefixed
+    // environment. (Drupal 6)
     $this->pass(t('Starting run with db_prefix %prefix', array('%prefix' => $db_prefix_new)), 'System');
 
 //    db_update('simpletest_test_id')

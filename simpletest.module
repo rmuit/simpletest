@@ -407,7 +407,8 @@ function simpletest_test_get_all_classes() {
   $files = module_rebuild_cache();
   foreach ($files as $file) {
     $directory = dirname($file->filename);
-    $test_files = file_scan_directory($directory, '\.test$');
+    $test_files = file_scan_directory($directory, '\.test$', array('.', '..', 'CVS'), FALSE, FALSE);
+    $test_files += file_scan_directory($directory . '/tests', '\.test$');
 
     foreach ($test_files as $test_file) {
       $pre = get_declared_classes();

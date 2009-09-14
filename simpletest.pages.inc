@@ -114,7 +114,8 @@ function theme_simpletest_test_table($table) {
 
     $row[] = '&nbsp;';
 
-    $rows[] = array('data' => $row, 'class' => array('simpletest-group'));
+//    $rows[] = array('data' => $row, 'class' => array('simpletest-group'));
+    $rows[] = array('data' => $row, 'class' => 'simpletest-group');
 
     // Add individual tests to group.
     $current_js = array(

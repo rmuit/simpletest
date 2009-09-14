@@ -497,7 +497,7 @@ function simpletest_get_like_tables($base_table = 'simpletest', $count = FALSE) 
   global $db_url, $db_prefix;
   $url = parse_url(is_array($db_url) ? $db_url['default'] : $db_url);
   $database = substr($url['path'], 1);
-  $result = db_query("SELECT table_name FROM information_schema.tables WHERE table_schema = '$database' AND table_name LIKE '$db_prefix$base_table%'");
+  $result = db_query("SELECT table_name FROM information_schema.tables WHERE (table_schema = '$database' OR table_catalog = '$database') AND table_name LIKE '$db_prefix$base_table%'");
   $schema = drupal_get_schema_unprocessed('simpletest');
 
   $tables = array();

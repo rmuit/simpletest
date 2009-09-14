@@ -5,6 +5,7 @@ SimpleTest 6.x-2.9, xxxx-xx-xx (development version)
 - Changes:
    * #576256: Theme laying needs to be initialized during setUp().
    * Correct comment on previous workaround.
+   * #400296 by neilnz: Make simpletest_get_like_tables() work in MySQL and PostgreSQL.
 - Bugs:
    * #442890: HEAD info left in simpletest.info.
    * #474394 by RockyRoad: block.test should treat delta as string.

@@ -1,6 +1,6 @@
 // $Id$
 
-SimpleTest 6.x-2.9, xxxx-xx-xx (development version)
+SimpleTest 6.x-2.9, 2009-09-14
 ------------------------------
 - Changes:
    * #576256: Theme laying needs to be initialized during setUp().

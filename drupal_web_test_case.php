@@ -557,8 +557,10 @@ class DrupalUnitTestCase extends DrupalTestCase {
     $this->originalFileDirectory = file_directory_path();
 
     // Generate temporary prefixed database to ensure that tests have a clean starting point.
-    $db_prefix = Database::getConnection()->prefixTables('{simpletest' . mt_rand(1000, 1000000) . '}');
-    $conf['file_public_path'] = $this->originalFileDirectory . '/' . $db_prefix;
+//    $db_prefix = Database::getConnection()->prefixTables('{simpletest' . mt_rand(1000, 1000000) . '}');
+    $db_prefix = $db_prefix . 'simpletest' . mt_rand(1000, 1000000);
+//    $conf['file_public_path'] = $this->originalFileDirectory . '/' . $db_prefix;
+    $conf['file_directory_path'] = $this->originalFileDirectory . '/simpletest/' . substr($db_prefix, 10);
 
     // If locale is enabled then t() will try to access the database and
     // subsequently will fail as the database is not accessible.
@@ -573,7 +575,8 @@ class DrupalUnitTestCase extends DrupalTestCase {
   function tearDown() {
     global $db_prefix, $conf;
     if (preg_match('/simpletest\d+/', $db_prefix)) {
-      $conf['file_public_path'] = $this->originalFileDirectory;
+//      $conf['file_public_path'] = $this->originalFileDirectory;
+      $conf['file_directory_path'] = $this->originalFileDirectory;
       // Return the database prefix to the original.
       $db_prefix = $this->originalPrefix;
       // Restore modules if necessary.

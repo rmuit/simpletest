@@ -1,5 +1,10 @@
 // $Id$
 
+SimpleTest 6.x-2.10, xxxx-xx-xx (development version)
+------------------------------
+- Changes:
+   * #580406: DrupalUnitTestCase requires Database class.
+
 SimpleTest 6.x-2.9, 2009-09-14
 ------------------------------
 - Changes:

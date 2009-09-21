@@ -186,7 +186,7 @@ function simpletest_requirements($phase) {
       'description' => $t('SimpleTest could not be installed. Must apply core patch, please see
                            <a href="@install">INSTALL.txt</a>.',
                            array('%settings' => realpath(conf_path() . '/settings.php'),
-                                 '@install' => drupal_get_path('module', 'simpletest') . '/INSTALL.txt')),
+                                 '@install' => '/' . drupal_get_path('module', 'simpletest') . '/INSTALL.txt')),
     );
   }
 

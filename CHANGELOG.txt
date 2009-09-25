@@ -5,6 +5,7 @@ SimpleTest 6.x-2.10, xxxx-xx-xx (development version)
 - Bugs
    * Correct INSTALL.txt link URL in requirement check.
    * #587304: Call to undefined function drupal_realpath().
+   * #587988: drupal_http_request() does not use drupal_generate_test_ua().
 - Changes:
    * #580406: DrupalUnitTestCase requires Database class.
 

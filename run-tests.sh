@@ -152,7 +152,7 @@ All arguments are long options.
   <test1>[,<test2>[,<test3> ...]]
 
               One or more tests to be run. By default, these are interpreted
-              as the names of test groups as shown at 
+              as the names of test groups as shown at
               ?q=admin/build/testing.
               These group names typically correspond to module names like "User"
               or "Profile" or "System", but there is also a group "XML-RPC".
@@ -366,7 +366,7 @@ function simpletest_script_run_one_test($test_id, $test_class) {
   require_once drupal_get_path('module', 'simpletest') . '/drupal_web_test_case.php';
   $classes = simpletest_test_get_all_classes();
   require_once $classes[$test_class]['file'];
-  
+
   $test = new $test_class($test_id);
   $test->run();
   $info = $test->getInfo();
@@ -415,17 +415,20 @@ function simpletest_script_get_test_list() {
       }
     }
     elseif ($args['file']) {
+      require_once drupal_get_path('module', 'simpletest') . '/drupal_web_test_case.php';
       $files = array();
       foreach ($args['test_names'] as $file) {
 //        $files[drupal_realpath($file)] = 1;
         $files[realpath($file)] = 1;
+        require_once realpath($file);
       }
 
       // Check for valid class names.
       foreach ($all_tests as $class_name) {
-        $refclass = new ReflectionClass($class_name);
-        $file = $refclass->getFileName();
-        if (isset($files[$file])) {
+//        $refclass = new ReflectionClass($class_name);
+//        $file = $refclass->getFileName();
+//        if (isset($files[$file])) {
+        if (class_exists($class_name, FALSE)) {
           $test_list[] = $class_name;
         }
       }

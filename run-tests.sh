@@ -425,11 +425,11 @@ function simpletest_script_get_test_list() {
 
       // Check for valid class names.
       foreach ($all_tests as $class_name) {
-//        $refclass = new ReflectionClass($class_name);
-//        $file = $refclass->getFileName();
-//        if (isset($files[$file])) {
         if (class_exists($class_name, FALSE)) {
-          $test_list[] = $class_name;
+          $refclass = new ReflectionClass($class_name);
+          if (isset($files[$refclass->getFileName()])) {
+            $test_list[] = $class_name;
+          }
         }
       }
     }

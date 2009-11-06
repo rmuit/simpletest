@@ -8,6 +8,7 @@ SimpleTest 6.x-2.10, xxxx-xx-xx (development version)
    * #587988: drupal_http_request() does not use drupal_generate_test_ua().
    * Manual fix of --file argument for run-tests.sh.
    * #596440 by grendzy: assertMail doesn't work on real modules - Class 'DrupalWebTestCase' not found.
+   * #603410: Missing backported error handler in _drupal_bootstrap_full().
 - Changes:
    * #580406: DrupalUnitTestCase requires Database class.
 

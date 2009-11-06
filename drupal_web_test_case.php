@@ -1173,7 +1173,7 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Use the test mail class instead of the default mail handler class.
 //    variable_set('mail_sending_system', array('default-system' => 'TestingMailSystem'));
-    variable_set('smtp_library', drupal_get_path('module', 'simpletest') . '/simpletest.test');
+    variable_set('smtp_library', drupal_get_path('module', 'simpletest') . '/simpletest.mail.inc');
 
     // Use temporary files directory with the same prefix as the database.
 //    $public_files_directory  = $this->originalFileDirectory . '/' . $db_prefix;
@@ -2562,7 +2562,11 @@ class DrupalWebTestCase extends DrupalTestCase {
     $captured_emails = variable_get('drupal_test_email_collector', array());
     $email = end($captured_emails);
 //    return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('E-mail'));
-    return $this->assertTrue($email && isset($email['params'][$name]) && $email['params'][$name] == $value, $message, t('E-mail'));
+    return $this->assertTrue(
+      ($email && isset($email[$name]) && $email[$name] == $value) ||
+      ($email && isset($email['params'][$name]) && $email['params'][$name] == $value),
+      $message,
+      t('E-mail'));
   }
 
   /**

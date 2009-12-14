@@ -11,6 +11,7 @@ SimpleTest 6.x-2.10, xxxx-xx-xx (development version)
    * #603410: Missing backported error handler in _drupal_bootstrap_full().
    * #640076: Link to file INSTALL.txt should use url().
    * #654534 by sun: SimpleTest deletes *all* files.
+   * #649344 by joachim: Link in admin help message to INSTALL file is broken.
 - Changes:
    * #580406: DrupalUnitTestCase requires Database class.
 - Backports:

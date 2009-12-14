@@ -10,6 +10,7 @@ SimpleTest 6.x-2.10, xxxx-xx-xx (development version)
    * #596440 by grendzy: assertMail doesn't work on real modules - Class 'DrupalWebTestCase' not found.
    * #603410: Missing backported error handler in _drupal_bootstrap_full().
    * #640076: Link to file INSTALL.txt should use url().
+   * #654534 by sun: SimpleTest deletes *all* files.
 - Changes:
    * #580406: DrupalUnitTestCase requires Database class.
 

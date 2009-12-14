@@ -519,7 +519,7 @@ function simpletest_clean_temporary_directories() {
   $count = 0;
   foreach ($files as $file) {
 //    $path = 'public://' . $file;
-    $path = file_directory_path() . $file;
+    $path = file_directory_path() . '/' . $file;
     if (is_dir($path) && preg_match('/^simpletest\d+/', $file)) {
 //      file_unmanaged_delete_recursive($path);
       simpletest_clean_temporary_directory($path);

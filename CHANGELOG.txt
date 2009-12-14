@@ -13,6 +13,8 @@ SimpleTest 6.x-2.10, xxxx-xx-xx (development version)
    * #654534 by sun: SimpleTest deletes *all* files.
 - Changes:
    * #580406: DrupalUnitTestCase requires Database class.
+- Backports:
+   * #653860 by yhahn: Ensure simpletest JS handlers are attached only once.
 
 SimpleTest 6.x-2.9, 2009-09-14
 ------------------------------

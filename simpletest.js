@@ -10,7 +10,7 @@
 Drupal.behaviors.simpleTestMenuCollapse = function() {
     var timeout = null;
     // Adds expand-collapse functionality.
-    $('div.simpletest-image').each(function () {
+    $('div.simpletest-image:not(.simpletest-image-processed)').addClass('simpletest-image-processed').each(function () {
 //      direction = settings.simpleTest[$(this).attr('id')].imageDirection;
 //      $(this).html(settings.simpleTest.images[direction]);
       direction = Drupal.settings.simpleTest[$(this).attr('id')].imageDirection;
@@ -18,7 +18,7 @@ Drupal.behaviors.simpleTestMenuCollapse = function() {
     });
 
     // Adds group toggling functionality to arrow images.
-    $('div.simpletest-image').click(function () {
+    $('div.simpletest-image:not(.simpletest-click-processed)').addClass('simpletest-click-processed').click(function () {
 //      var trs = $(this).parents('tbody').children('.' + settings.simpleTest[this.id].testClass);
 //      var direction = settings.simpleTest[this.id].imageDirection;
       var trs = $(this).parents('tbody').children('.' + Drupal.settings.simpleTest[this.id].testClass);
@@ -70,7 +70,7 @@ Drupal.behaviors.simpleTestMenuCollapse = function() {
 //Drupal.behaviors.simpleTestSelectAll = {
 //  attach: function (context, settings) {
 Drupal.behaviors.simpleTestSelectAll = function() {
-    $('td.simpletest-select-all').each(function () {
+    $('td.simpletest-select-all:not(.simpletest-select-processed)').addClass('simpletest-select-processed').each(function () {
 //      var testCheckboxes = settings.simpleTest['simpletest-test-group-' + $(this).attr('id')].testNames;
       var testCheckboxes = Drupal.settings.simpleTest['simpletest-test-group-' + $(this).attr('id')].testNames;
       var groupCheckbox = $('<input type="checkbox" class="form-checkbox" id="' + $(this).attr('id') + '-select-all" />');

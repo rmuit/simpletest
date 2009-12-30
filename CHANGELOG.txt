@@ -14,6 +14,7 @@ SimpleTest 6.x-2.10, xxxx-xx-xx (development version)
    * #649344 by joachim: Link in admin help message to INSTALL file is broken.
 - Changes:
    * #580406: DrupalUnitTestCase requires Database class.
+   * #667546: INSTALL.txt text correction.
 - Backports:
    * #653860 by yhahn: Ensure simpletest JS handlers are attached only once.
 

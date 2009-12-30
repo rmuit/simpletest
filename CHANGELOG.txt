@@ -1,7 +1,7 @@
 // $Id$
 
-SimpleTest 6.x-2.10, xxxx-xx-xx (development version)
-------------------------------
+SimpleTest 6.x-2.10, 2009-12-30
+-------------------------------
 - Bugs
    * Correct INSTALL.txt link URL in requirement check.
    * #587304: Call to undefined function drupal_realpath().

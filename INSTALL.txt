@@ -6,7 +6,8 @@ Jimmy Berry ("boombatower", http://drupal.org/user/214218)
 
 REQUIREMENTS
 ------------
-The php-curl library is required for SimpleTest to function.
+ * PHP 5.2 - both patched core and SimpleTest module
+   - php-curl
 
 INSTALLATION
 ------------
@@ -27,7 +28,3 @@ INSTALLATION
 
 5. Go to Administer >> Site building >> Testing (admin/build/testing) to
    begin using the module.
-
-6. (Optional)
-   Go to Administer >> Help >> SimpleTest (admin/help/simpletest)
-   for more information on how to use the SimpleTest module.

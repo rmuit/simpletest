@@ -4,6 +4,7 @@ SimpleTest 6.x-2.11, xxxx-xx-xx (development version)
 -------------------------------
 - Bugs
    * #673928: SimpleTest 6.x-2.x requires PHP 5.2, but does not require in .info.
+   * #680318: Update D6 core patch.
 
 SimpleTest 6.x-2.10, 2009-12-30
 -------------------------------

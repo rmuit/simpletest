@@ -4,7 +4,7 @@ RCS file: /cvs/drupal/drupal/includes/bootstrap.inc,v
 retrieving revision 1.206.2.13
 diff -u -r1.206.2.13 bootstrap.inc
 --- includes/bootstrap.inc	14 Sep 2009 13:33:39 -0000	1.206.2.13
-+++ includes/bootstrap.inc	27 Jan 2010 00:59:53 -0000
++++ includes/bootstrap.inc	27 Jan 2010 01:32:00 -0000
 @@ -991,7 +991,7 @@
  }
  
@@ -86,7 +86,7 @@ RCS file: /cvs/drupal/drupal/includes/common.inc,v
 retrieving revision 1.756.2.75
 diff -u -r1.756.2.75 common.inc
 --- includes/common.inc	16 Dec 2009 21:14:02 -0000	1.756.2.75
-+++ includes/common.inc	27 Jan 2010 00:59:53 -0000
++++ includes/common.inc	27 Jan 2010 01:32:00 -0000
 @@ -520,7 +520,7 @@
    // same time won't interfere with each other as they would if the database
    // prefix were stored statically in a file or database variable.
@@ -96,7 +96,16 @@ diff -u -r1.756.2.75 common.inc
    }
  
    foreach ($headers as $header => $value) {
-@@ -2604,7 +2604,16 @@
+@@ -2597,14 +2597,24 @@
+   require_once './includes/mail.inc';
+   require_once './includes/actions.inc';
+   // Set the Drupal custom error handler.
+-  set_error_handler('drupal_error_handler');
++  set_error_handler('_drupal_error_handler');
++  set_exception_handler('_drupal_exception_handler');
+   // Emit the correct charset HTTP header.
+   drupal_set_header('Content-Type: text/html; charset=utf-8');
+   // Detect string handling method
    unicode_check();
    // Undo magic quotes
    fix_gpc_magic();
@@ -114,7 +123,7 @@ diff -u -r1.756.2.75 common.inc
    module_load_all();
    // Let all modules take action before menu system handles the request
    // We do not want this while running update.php.
-@@ -3721,3 +3730,264 @@
+@@ -3721,3 +3731,264 @@
    }
    variable_set('css_js_query_string', $new_character . substr($string_history, 0, 19));
  }
@@ -385,7 +394,7 @@ RCS file: /cvs/drupal/drupal/install.php,v
 retrieving revision 1.113.2.9
 diff -u -r1.113.2.9 install.php
 --- install.php	27 Apr 2009 10:50:35 -0000	1.113.2.9
-+++ install.php	27 Jan 2010 00:59:53 -0000
++++ install.php	27 Jan 2010 01:32:00 -0000
 @@ -20,6 +20,14 @@
    require_once './includes/bootstrap.inc';
    drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);

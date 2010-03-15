@@ -208,7 +208,12 @@ function _simpletest_batch_operation($test_list_init, $test_id, &$context) {
   // Drupal 6.
   require_once drupal_get_path('module', 'simpletest') . '/drupal_web_test_case.php';
   $classes = simpletest_test_get_all_classes();
-  require_once $classes[$test_class]['file'];
+
+//  require_once $classes[$test_class]['file'];
+  // Drupal 6.
+  if (!empty($classes)) {
+    require_once $classes[$test_class]['file'];
+  }
 
   $test = new $test_class($test_id);
   $test->run();

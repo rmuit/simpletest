@@ -1,6 +1,6 @@
 // $Id$
 
-SimpleTest 6.x-2.11, xxxx-xx-xx (development version)
+SimpleTest 6.x-2.11, 2010-10-07
 -------------------------------
 - Bugs
    * #673928: SimpleTest 6.x-2.x requires PHP 5.2, but does not require in .info.

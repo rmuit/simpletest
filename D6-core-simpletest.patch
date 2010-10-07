@@ -1,14 +1,17 @@
+? sites/all/modules
+? sites/default/files
+? sites/default/settings.php
 Index: install.php
 ===================================================================
 RCS file: /cvs/drupal/drupal/install.php,v
 retrieving revision 1.113.2.12
 diff -u -p -r1.113.2.12 install.php
 --- install.php	9 May 2010 14:13:31 -0000	1.113.2.12
-+++ install.php	7 Oct 2010 21:24:26 -0000
++++ install.php	7 Oct 2010 21:55:51 -0000
 @@ -20,6 +20,14 @@ function install_main() {
    require_once './includes/bootstrap.inc';
    drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
-
+ 
 +  // The user agent header is used to pass a database prefix in the request when
 +  // running tests. However, for security reasons, it is imperative that no
 +  // installation be permitted using such a prefix.
@@ -19,26 +22,26 @@ diff -u -p -r1.113.2.12 install.php
 +
    // This must go after drupal_bootstrap(), which unsets globals!
    global $profile, $install_locale, $conf;
-
+ 
 Index: includes/bootstrap.inc
 ===================================================================
 RCS file: /cvs/drupal/drupal/includes/bootstrap.inc,v
 retrieving revision 1.206.2.29
 diff -u -p -r1.206.2.29 bootstrap.inc
 --- includes/bootstrap.inc	6 Aug 2010 11:50:24 -0000	1.206.2.29
-+++ includes/bootstrap.inc	7 Oct 2010 21:24:26 -0000
++++ includes/bootstrap.inc	7 Oct 2010 21:55:51 -0000
 @@ -1112,7 +1112,7 @@ function drupal_bootstrap($phase) {
  }
-
+ 
  function _drupal_bootstrap($phase) {
 -  global $conf;
 +  global $conf, $db_prefix;
-
+ 
    switch ($phase) {
-
-@@ -1138,6 +1138,18 @@ function _drupal_bootstrap($phase) {
+ 
+@@ -1138,6 +1138,19 @@ function _drupal_bootstrap($phase) {
        break;
-
+ 
      case DRUPAL_BOOTSTRAP_DATABASE:
 +      // The user agent header is used to pass a database prefix in the request when
 +      // running tests. However, for security reasons, it is imperative that we
@@ -49,14 +52,15 @@ diff -u -p -r1.206.2.29 bootstrap.inc
 +          header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
 +          exit;
 +        }
-+        $db_prefix .= $matches[1];
++        $db_prefix_string = is_array($db_prefix) ? $db_prefix['default'] : $db_prefix;
++        $db_prefix = $db_prefix_string . $matches[1];
 +      }
 +
        // Initialize the default database.
        require_once './includes/database.inc';
        db_set_active();
-@@ -1331,3 +1343,46 @@ function ip_address() {
-
+@@ -1331,3 +1344,46 @@ function ip_address() {
+ 
    return $ip_address;
  }
 +
@@ -108,7 +112,7 @@ RCS file: /cvs/drupal/drupal/includes/common.inc,v
 retrieving revision 1.756.2.98
 diff -u -p -r1.756.2.98 common.inc
 --- includes/common.inc	6 Sep 2010 11:13:27 -0000	1.756.2.98
-+++ includes/common.inc	7 Oct 2010 21:24:26 -0000
++++ includes/common.inc	7 Oct 2010 21:55:51 -0000
 @@ -531,7 +531,7 @@ function drupal_http_request($url, $head
    // same time won't interfere with each other as they would if the database
    // prefix were stored statically in a file or database variable.
@@ -116,7 +120,7 @@ diff -u -p -r1.756.2.98 common.inc
 -    $defaults['User-Agent'] = 'User-Agent: ' . $matches[0];
 +    $defaults['User-Agent'] = 'User-Agent: ' . drupal_generate_test_ua($matches[0]);
    }
-
+ 
    foreach ($headers as $header => $value) {
 @@ -2661,14 +2661,24 @@ function _drupal_bootstrap_full() {
    require_once './includes/mail.inc';

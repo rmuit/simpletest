@@ -8,6 +8,7 @@ SimpleTest 6.x-2.11, xxxx-xx-xx (development version)
    * #627390: Filename cannot be empty if a test lasts less than 1s.
 - Changes:
    * #488810: drupalPost and hidden input.
+   * #867560: INSTALL.txt should contain details on patching
 
 SimpleTest 6.x-2.10, 2009-12-30
 -------------------------------

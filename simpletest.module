@@ -211,7 +211,7 @@ function _simpletest_batch_operation($test_list_init, $test_id, &$context) {
 
 //  require_once $classes[$test_class]['file'];
   // Drupal 6.
-  if (!empty($classes)) {
+  if (!empty($classes[$test_class]['file'])) {
     require_once $classes[$test_class]['file'];
   }
 

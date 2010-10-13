@@ -1,5 +1,10 @@
 // $Id$
 
+SimpleTest 6.x-2.12, xxxx-xx-xx
+-------------------------------
+- Bugs
+   * #696552: Fix tests when run in a subdirectory.
+
 SimpleTest 6.x-2.11, 2010-10-07
 -------------------------------
 - Bugs

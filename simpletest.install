@@ -4,16 +4,16 @@
 
 /**
  * @file
- * Backport of Drupal 7 simpletest.install with modifications, see BACKPORT.txt.
- *
- * Copyright 2008-2009 by Jimmy Berry ("boombatower", http://drupal.org/user/214218)
+ * Install, update and uninstall functions for the simpletest module.
  */
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 function simpletest_install() {
+  // Install schema.
   drupal_install_schema('simpletest');
+
   // Check for files directory.
 //  $path = 'public://simpletest';
 //  if (file_prepare_directory($path, FILE_CREATE_DIRECTORY)) {
@@ -107,14 +107,15 @@ function simpletest_get_file_count($directory, $filename) {
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function simpletest_uninstall() {
   simpletest_clean_environment();
 
   // Remove settings variables.
-  variable_del('simpletest_username');
-  variable_del('simpletest_password');
+  variable_del('simpletest_httpauth_method');
+  variable_del('simpletest_httpauth_username');
+  variable_del('simpletest_httpauth_password');
   variable_del('simpletest_clear_results');
   variable_del('simpletest_verbose');
 
@@ -142,6 +143,8 @@ function simpletest_requirements($phase) {
   $has_curl = function_exists('curl_init');
   $has_hash = function_exists('hash_hmac');
   $has_domdocument = method_exists('DOMDocument', 'loadHTML');
+  $open_basedir = ini_get('open_basedir');
+  $patch_installed = isset($GLOBALS['simpletest_installed']);
 
   $requirements['curl'] = array(
     'title' => $t('cURL'),
@@ -166,33 +169,38 @@ function simpletest_requirements($phase) {
   );
   if (!$has_domdocument) {
     $requirements['php_domdocument']['severity'] = REQUIREMENT_ERROR;
-    $requirements['php_domdocument']['description'] =t('SimpleTest requires the DOMDocument class to be available. Please check the configure command at the <a href="@link-phpinfo">PHP info page</a>.', array('@link-phpinfo' => url('admin/reports/status/php')));
+    $requirements['php_domdocument']['description'] = $t('SimpleTest requires the DOMDocument class to be available. Check the configure command at the <a href="@link-phpinfo">PHP info page</a>.', array('@link-phpinfo' => url('admin/reports/status/php')));
   }
 
-  // Drupal 6.
-  // Check that the global variable is defined signifying that the code was inserted correctly.
-  if (isset($GLOBALS['simpletest_installed'])) {
-     $requirements['simpletest_settings'] = array(
-      'title' => $t('SimpleTest code addition'),
-      'value' => t('Found'),
-      'severity' => REQUIREMENT_OK
-    );
+  // SimpleTest currently needs 2 cURL options which are incompatible with
+  // having PHP's open_basedir restriction set.
+  // See http://drupal.org/node/674304.
+  $requirements['php_open_basedir'] = array(
+    'title' => $t('PHP open_basedir restriction'),
+    'value' => $open_basedir ? $t('Enabled') : $t('Disabled'),
+  );
+  if ($open_basedir) {
+    $requirements['php_open_basedir']['severity'] = REQUIREMENT_ERROR;
+    $requirements['php_open_basedir']['description'] = $t('The testing framework requires the PHP <a href="@open_basedir-url">open_basedir</a> restriction to be disabled. Check your webserver configuration or contact your web host.', array('@open_basedir-url' => 'http://php.net/manual/en/ini.core.php#ini.open-basedir'));
   }
-  else {
-    $requirements['simpletest_settings'] = array(
-      'title' => $t('SimpleTest code addition'),
-      'value' => t('Not-found'),
-      'severity' => REQUIREMENT_ERROR,
-      'description' => $t('SimpleTest could not be installed. Must apply core patch, please see
-                           <a href="@install">INSTALL.txt</a>.',
-                           array('%settings' => realpath(conf_path() . '/settings.php'),
-                                 '@install' => base_path() . drupal_get_path('module', 'simpletest') . '/INSTALL.txt')),
-    );
+
+  // Check that the global variable is defined signifying that the patch
+  // was correctly applied to the Drupal 6 core.
+  $requirements['simpletest_patch'] = array(
+    'title' => $t('SimpleTest code addition'),
+    'value' => $patch_installed ? $t('Found') : $t('Not found'),
+  );
+  if (!$patch_installed) {
+    $requirements['simpletest_patch']['severity'] = REQUIREMENT_ERROR;
+    $requirements['simpletest_patch']['description'] = $t('SimpleTest could not be installed. The required core patch must be applied. See the included <a href="@install">INSTALL.txt</a>.', array('@install' => base_path() . drupal_get_path('module', 'simpletest') . '/INSTALL.txt'));
   }
 
   return $requirements;
 }
 
+/**
+ * Implements hook_schema().
+ */
 function simpletest_schema() {
   $schema['simpletest'] = array(
     'description' => 'Stores simpletest messages',
@@ -305,4 +313,17 @@ function simpletest_update_6200() {
   simpletest_install();
 
   return $ret;
+}
+
+/**
+ * Renamed authentication username and password variables.
+ */
+function simpletest_update_6201() {
+  $username = variable_get('simpletest_username', '');
+  $password = variable_get('simpletest_password', '');
+  variable_set('simpletest_httpauth_username', $username);
+  variable_set('simpletest_httpauth_password', $password);
+  variable_del('simpletest_username', '');
+  variable_del('simpletest_password', '');
+  return array();
 }

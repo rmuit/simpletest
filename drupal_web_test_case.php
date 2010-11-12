@@ -1,16 +1,5 @@
 <?php
 // $Id$
-// Core: Id: drupal_web_test_case.php,v 1.146 2009/08/31 18:30:26 webchick Exp $
-
-/**
- * @file
- * Provide required modifications to Drupal 7 core DrupalWebTestCase in order
- * for it to function properly in Drupal 6.
- *
- * Copyright 2008-2009 by Jimmy Berry ("boombatower", http://drupal.org/user/214218)
- */
-
-module_load_include('function.inc', 'simpletest');
 
 /**
  * Base class for Drupal tests.
@@ -42,7 +31,7 @@ abstract class DrupalTestCase {
   /**
    * Time limit for the test.
    */
-  protected $timeLimit = 180;
+  protected $timeLimit = 240;
 
   /**
    * Current results of this test case.
@@ -162,7 +151,11 @@ abstract class DrupalTestCase {
    * the method behaves just like DrupalTestCase::assert() in terms of storing
    * the assertion.
    *
+   * @return
+   *   Message ID of the stored assertion.
+   *
    * @see DrupalTestCase::assert()
+   * @see DrupalTestCase::deleteAssert()
    */
   public static function insertAssert($test_id, $test_class, $status, $message = '', $group = 'Other', array $caller = array()) {
     // Convert boolean status to string status.
@@ -187,12 +180,26 @@ abstract class DrupalTestCase {
       'file' => $caller['file'],
     );
 
-//    db_insert('simpletest')
-//      ->fields($assertion)
-//      ->execute();
     db_query("INSERT INTO {simpletest}
               (test_id, test_class, status, message, message_group, function, line, file)
               VALUES (%d, '%s', '%s', '%s', '%s', '%s', %d, '%s')", array_values($assertion));
+    $message_id = db_last_insert_id('simpletest', 'message_id');
+    return $message_id;
+  }
+
+  /**
+   * Delete an assertion record by message ID.
+   *
+   * @param $message_id
+   *   Message ID of the assertion to delete.
+   * @return
+   *   TRUE if the assertion was deleted, FALSE otherwise.
+   *
+   * @see DrupalTestCase::insertAssert()
+   */
+  public static function deleteAssert($message_id) {
+    db_query("DELETE FROM {simpletest} WHERE message_id = %d", $message_id);
+    return (bool) db_affected_rows();
   }
 
   /**
@@ -412,18 +419,28 @@ abstract class DrupalTestCase {
 
     // HTTP auth settings (<username>:<password>) for the simpletest browser
     // when sending requests to the test site.
-    $username = variable_get('simpletest_username', NULL);
-    $password = variable_get('simpletest_password', NULL);
+    $this->httpauth_method = variable_get('simpletest_httpauth_method', CURLAUTH_BASIC);
+    $username = variable_get('simpletest_httpauth_username', NULL);
+    $password = variable_get('simpletest_httpauth_password', NULL);
     if ($username && $password) {
       $this->httpauth_credentials = $username . ':' . $password;
     }
 
     set_error_handler(array($this, 'errorHandler'));
-    $methods = array();
+    $class = get_class($this);
     // Iterate through all the methods in this class.
-    foreach (get_class_methods(get_class($this)) as $method) {
+    foreach (get_class_methods($class) as $method) {
       // If the current method starts with "test", run it - it's a test.
       if (strtolower(substr($method, 0, 4)) == 'test') {
+        // Insert a fail record. This will be deleted on completion to ensure
+        // that testing completed.
+        $method_info = new ReflectionMethod($class, $method);
+        $caller = array(
+          'file' => $method_info->getFileName(),
+          'line' => $method_info->getStartLine(),
+          'function' => $class . '->' . $method . '()',
+        );
+        $completion_check_id = DrupalTestCase::insertAssert($this->testId, $class, FALSE, t('The test did not complete due to a fatal error.'), 'Completion check', $caller);
         $this->setUp();
         try {
           $this->$method();
@@ -433,6 +450,8 @@ abstract class DrupalTestCase {
           $this->exceptionHandler($e);
         }
         $this->tearDown();
+        // Remove the completion check record.
+        DrupalTestCase::deleteAssert($completion_check_id);
       }
     }
     // Clear out the error messages and restore error handler.
@@ -535,8 +554,7 @@ abstract class DrupalTestCase {
  *
  * These tests can not access the database nor files. Calling any Drupal
  * function that needs the database will throw exceptions. These include
- * watchdog(), function_exists(), module_implements(),
- * module_invoke_all() etc.
+ * watchdog(), module_implements(), module_invoke_all() etc.
  */
 class DrupalUnitTestCase extends DrupalTestCase {
 
@@ -660,6 +678,11 @@ class DrupalWebTestCase extends DrupalTestCase {
    * @var object
    */
   protected $originalUser = NULL;
+
+  /**
+   * HTTP authentication method
+   */
+  protected $httpauth_method = CURLAUTH_BASIC;
 
   /**
    * HTTP authentication credentials (<username>:<password>).
@@ -1297,6 +1320,7 @@ class DrupalWebTestCase extends DrupalTestCase {
         CURLOPT_HEADERFUNCTION => array(&$this, 'curlHeaderCallback'),
       );
       if (isset($this->httpauth_credentials)) {
+        $curl_options[CURLOPT_HTTPAUTH] = $this->httpauth_method;
         $curl_options[CURLOPT_USERPWD] = $this->httpauth_credentials;
       }
       curl_setopt_array($this->curlHandle, $this->additionalCurlOptions + $curl_options);
@@ -2666,7 +2690,7 @@ function simpletest_verbose($message, $original_file_directory = NULL, $test_cla
   if ($original_file_directory) {
     $file_directory = $original_file_directory;
     $class = $test_class;
-    $verbose = variable_get('simpletest_verbose', FALSE);
+    $verbose = variable_get('simpletest_verbose', TRUE);
     $directory = $file_directory . '/simpletest/verbose';
 //    return file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
     return file_check_directory($directory, FILE_CREATE_DIRECTORY);

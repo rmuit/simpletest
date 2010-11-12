@@ -2582,10 +2582,10 @@ class DrupalWebTestCase extends DrupalTestCase {
    */
   protected function verbose($message) {
     if ($id = simpletest_verbose($message)) {
-      $this->pass(l(t('Verbose message'), $this->originalFileDirectory . '/simpletest/verbose/' . get_class($this) . '-' . $id . '.html', array('attributes' => array('target' => '_blank'))), 'Debug');
+      $file_path = $GLOBALS['base_url'] . '/' . $this->originalFileDirectory . '/simpletest/verbose/' . get_class($this) . '-' . $id . '.html';
+      $this->pass(l(t('Verbose message'), $file_path, array('attributes' => array('target' => '_blank'))), 'Debug');
     }
   }
-
 }
 
 /**

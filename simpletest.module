@@ -1,6 +1,5 @@
 <?php
 // $Id$
-// Core: Id: simpletest.module,v 1.71 2009/08/24 00:14:21 webchick Exp
 
 /**
  * @file
@@ -114,15 +113,10 @@ function _simpletest_format_summary_line($summary) {
  *   drupal being the default.
  */
 function simpletest_run_tests($test_list, $reporter = 'drupal') {
-  cache_clear_all();
-//  $test_id = db_insert('simpletest_test_id')
-//    ->useDefaults(array('test_id'))
-//    ->execute();
   db_query('INSERT INTO {simpletest_test_id} (test_id) VALUES (default)');
   $test_id = db_last_insert_id('simpletest_test_id', 'test_id');
 
   // Clear out the previous verbose files.
-//  file_unmanaged_delete_recursive(file_directory_path() . '/simpletest/verbose');
   simpletest_clean_temporary_directory(file_directory_path() . '/simpletest/verbose');
 
   // Get the info for the first test being run.
@@ -176,12 +170,8 @@ function _simpletest_batch_operation($test_list_init, $test_id, &$context) {
   // Perform the next test.
   $test_class = array_shift($test_list);
 
-  // Drupal 6.
   require_once drupal_get_path('module', 'simpletest') . '/drupal_web_test_case.php';
   $classes = simpletest_test_get_all_classes();
-
-//  require_once $classes[$test_class]['file'];
-  // Drupal 6.
   if (!empty($classes[$test_class]['file'])) {
     require_once $classes[$test_class]['file'];
   }
@@ -237,7 +227,7 @@ function _simpletest_batch_finished($success, $results, $operations) {
   module_invoke_all('test_group_finished');
 }
 
-/*
+/**
  * Get information about the last test that ran given a test ID.
  *
  * @param $test_id
@@ -320,7 +310,6 @@ function simpletest_log_read($test_id, $prefix, $test_class, $during_test = FALS
  * @see simpletest_registry_files_alter()
  */
 function simpletest_test_get_all() {
-//  $groups = &drupal_static(__FUNCTION__);
   static $groups;
 
   if (!$groups) {
@@ -331,23 +320,16 @@ function simpletest_test_get_all() {
     }
     else {
       // Select all clases in files ending with .test.
-//      $classes = db_select('registry')
-//        ->fields('registry', array('name'))
-//        ->condition('type', 'class')
-//        ->condition('filename', '%.test', 'LIKE')
-//        ->execute();
       $classes = simpletest_test_get_all_classes();
 
-      $groups = array();
 
       // Check that each class has a getInfo() method and store the information
       // in an array keyed with the group specified in the test information.
+      $groups = array();
       foreach ($classes as $class) {
-//        $class = $class->name;
         $class = $class['class'];
-
+        // Test classes need to implement getInfo() to be valid.
         if (class_exists($class) && method_exists($class, 'getInfo')) {
-          // Valid test class, retrieve test information.
           $info = call_user_func(array($class, 'getInfo'));
 
           // If this test class requires a non-existing module, skip it.
@@ -404,29 +386,6 @@ function simpletest_test_get_all_classes() {
   return $classes;
 }
 
-///**
-// * Implementation of hook_registry_files_alter().
-// *
-// * Add the test files for disabled modules so that we get a list containing
-// * all the avialable tests.
-// */
-//function simpletest_registry_files_alter(&$files, $modules) {
-//  foreach ($modules as $module) {
-//    // Only add test files for disabled modules, as enabled modules should
-//    // already include any test files they provide.
-//    if (!$module->status) {
-//      $dir = $module->dir;
-//      if (!empty($module->info['files'])) {
-//        foreach ($module->info['files'] as $file) {
-//          if (substr($file, -5) == '.test') {
-//            $files["$dir/$file"] = array('module' => $module->name, 'weight' => $module->weight);
-//          }
-//        }
-//      }
-//    }
-//  }
-//}
-
 /**
  * Remove all temporary database tables and directories.
  */
@@ -440,6 +399,9 @@ function simpletest_clean_environment() {
   else {
     drupal_set_message(t('Clear results is disabled and the test results table will not be cleared.'), 'warning');
   }
+
+  // Detect test classes that have been added, renamed or deleted.
+  cache_clear_all('simpletest', 'cache');
 }
 
 /**
@@ -449,17 +411,18 @@ function simpletest_clean_database() {
 //  $tables = db_find_tables(Database::getConnection()->prefixTables('{simpletest}') . '%');
   $tables = simpletest_get_like_tables();
   $schema = drupal_get_schema_unprocessed('simpletest');
-  $ret = array();
+  $count = 0;
   foreach (array_diff_key($tables, $schema) as $table) {
     // Strip the prefix and skip tables without digits following "simpletest",
     // e.g. {simpletest_test_id}.
     if (preg_match('/simpletest\d+.*/', $table, $matches)) {
       db_drop_table($ret, $matches[0]);
+      $count++;
     }
   }
 
-  if (count($ret) > 0) {
-    drupal_set_message(format_plural(count($ret), 'Removed 1 leftover table.', 'Removed @count leftover tables.'));
+  if ($count > 0) {
+    drupal_set_message(format_plural($count, 'Removed 1 leftover table.', 'Removed @count leftover tables.'));
   }
   else {
     drupal_set_message(t('No leftover tables to remove.'));
@@ -493,14 +456,11 @@ function simpletest_get_like_tables($base_table = 'simpletest', $count = FALSE) 
  * Find all leftover temporary directories and remove them.
  */
 function simpletest_clean_temporary_directories() {
-//  $files = scandir('public://');
   $files = scandir(file_directory_path());
   $count = 0;
   foreach ($files as $file) {
-//    $path = 'public://' . $file;
     $path = file_directory_path() . '/' . $file;
     if (is_dir($path) && preg_match('/^simpletest\d+/', $file)) {
-//      file_unmanaged_delete_recursive($path);
       simpletest_clean_temporary_directory($path);
       $count++;
     }

@@ -1,6 +1,5 @@
 <?php
 // $Id$
-// Core: Id: simpletest.install,v 1.26 2009/08/17 19:14:41 webchick Exp
 
 /**
  * @file
@@ -124,16 +123,16 @@ function simpletest_uninstall() {
 
   // Remove generated files.
   $path = file_directory_path() . '/simpletest';
-//  $files = file_scan_directory($path, '/.*/');
   $files = file_scan_directory($path, '.*');
   foreach ($files as $file) {
-//    file_unmanaged_delete($file->uri);
     unlink($file->filename);
   }
   rmdir($path);
 }
 
 /**
+ * Implements hook_requirements().
+ *
  * Check that the cURL extension exists for PHP.
  */
 function simpletest_requirements($phase) {

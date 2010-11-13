@@ -31,7 +31,7 @@ abstract class DrupalTestCase {
   /**
    * Time limit for the test.
    */
-  protected $timeLimit = 240;
+  protected $timeLimit = 500;
 
   /**
    * Current results of this test case.
@@ -508,45 +508,41 @@ abstract class DrupalTestCase {
    * is not restricted.
    *
    * @param $length
-   *   Length of random string to generate which will be appended to $db_prefix.
+   *   Length of random string to generate.
    * @return
    *   Randomly generated string.
    */
   public static function randomString($length = 8) {
-    global $db_prefix;
-
     $str = '';
     for ($i = 0; $i < $length; $i++) {
       $str .= chr(mt_rand(32, 126));
     }
-    return str_replace('simpletest', 's', $db_prefix) . $str;
+    return $str;
   }
 
   /**
    * Generates a random string containing letters and numbers.
    *
-   * The letters may be upper or lower case. This method is better for
-   * restricted inputs that do not accept certain characters. For example,
-   * when testing input fields that require machine readable values (ie without
-   * spaces and non-standard characters) this method is best.
+   * The string will always start with a letter. The letters may be upper or
+   * lower case. This method is better for restricted inputs that do not
+   * accept certain characters. For example, when testing input fields that
+   * require machine readable values (i.e. without spaces and non-standard
+   * characters) this method is best.
    *
    * @param $length
-   *   Length of random string to generate which will be appended to $db_prefix.
+   *   Length of random string to generate.
    * @return
    *   Randomly generated string.
    */
   public static function randomName($length = 8) {
-    global $db_prefix;
-
     $values = array_merge(range(65, 90), range(97, 122), range(48, 57));
     $max = count($values) - 1;
-    $str = '';
-    for ($i = 0; $i < $length; $i++) {
+    $str = chr(mt_rand(97, 122));
+    for ($i = 1; $i < $length; $i++) {
       $str .= chr($values[mt_rand(0, $max)]);
     }
-    return str_replace('simpletest', 's', $db_prefix) . $str;
+    return $str;
   }
-
 }
 
 /**
@@ -642,6 +638,13 @@ class DrupalWebTestCase extends DrupalTestCase {
    * @var string
    */
   protected $plainTextContent;
+
+  /**
+   * The value of the Drupal.settings JavaScript variable for the page currently loaded in the internal browser.
+   *
+   * @var Array
+   */
+  protected $drupalSettings;
 
   /**
    * The parsed version of the page.
@@ -790,9 +793,7 @@ class DrupalWebTestCase extends DrupalTestCase {
   protected function drupalCreateContentType($settings = array()) {
     // Find a non-existent random type name.
     do {
-//      $name = strtolower($this->randomName(8));
-//    } while (node_type_get_type($name));
-      $name = strtolower($this->randomName(3, 'type_'));
+      $name = strtolower($this->randomName(8));
     } while (node_get_types('type', $name));
 
     // Populate defaults array.
@@ -801,7 +802,7 @@ class DrupalWebTestCase extends DrupalTestCase {
       'name' => $name,
       'description' => '',
       'help' => '',
-      'min_word_count' => 0, // Drupal 6.
+      'min_word_count' => 0,
       'title_label' => 'Title',
       'body_label' => 'Body',
       'has_title' => 1,
@@ -854,10 +855,8 @@ class DrupalWebTestCase extends DrupalTestCase {
       // If size is set then remove any files that are not of that size.
       if ($size !== NULL) {
         foreach ($files as $file) {
-//          $stats = stat($file->uri);
           $stats = stat($file->filename);
           if ($stats['size'] != $size) {
-//            unset($files[$file->uri]);
             unset($files[$file->filename]);
           }
         }
@@ -966,11 +965,9 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE or FALSE depending on whether the permissions are valid.
    */
   protected function checkPermissions(array $permissions, $reset = FALSE) {
-//    $available = &drupal_static(__FUNCTION__);
     static $available;
 
     if (!isset($available) || $reset) {
-//      $available = array_keys(module_invoke_all('permission'));
       $available = module_invoke_all('perm');
     }
 
@@ -1342,6 +1339,9 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   An associative array of cURL options to set, where the keys are constants
    *   defined by the cURL library. For a list of valid options, see
    *   http://www.php.net/manual/function.curl-setopt.php
+   * @param $redirect
+   *   FALSE if this is an initial request, TRUE if this request is the result
+   *   of a redirect.
    *
    * @return
    *   The content returned from the call to curl_exec().
@@ -1465,7 +1465,8 @@ class DrupalWebTestCase extends DrupalTestCase {
     if (!$this->elements) {
       // DOM can load HTML soup. But, HTML soup can throw warnings, suppress
       // them.
-      @$htmlDom = DOMDocument::loadHTML($this->drupalGetContent());
+      $htmlDom = new DOMDocument();
+      @$htmlDom->loadHTML($this->drupalGetContent());
       if ($htmlDom) {
         $this->pass(t('Valid HTML found on "@path"', array('@path' => $this->getUrl())), t('Browser'));
         // It's much easier to work with simplexml than DOM, luckily enough
@@ -1512,6 +1513,13 @@ class DrupalWebTestCase extends DrupalTestCase {
     return $out;
   }
 
+  ///**
+  // * Retrieve a Drupal path or an absolute path and JSON decode the result.
+  // */
+  //protected function drupalGetAJAX($path, array $options = array(), array $headers = array()) {
+  //  return drupal_json_decode($this->drupalGet($path, $options, $headers));
+  //}
+
   /**
    * Execute a POST request on a Drupal page.
    * It will be done as usual POST request with SimpleBrowser.
@@ -1539,25 +1547,53 @@ class DrupalWebTestCase extends DrupalTestCase {
    *
    *   Multiple select fields can be set using name[] and setting each of the
    *   possible values. Example:
+   *   @code
    *   $edit = array();
    *   $edit['name[]'] = array('value1', 'value2');
+   *   @endcode
    * @param $submit
-   *   Value of the submit button.
+   *   Value of the submit button whose click is to be emulated. For example,
+   *   t('Save'). The processing of the request depends on this value. For
+   *   example, a form may have one button with the value t('Save') and another
+   *   button with the value t('Delete'), and execute different code depending
+   *   on which one is clicked.
+   *
+   *   This can also be set to NULL in order to emulate an Internet Explorer
+   *   submission of a form with a single text field, and pressing ENTER in that
+   *   textfield: under these conditions, no button information is added to the
+   *   POST data.
    * @param $options
    *   Options to be forwarded to url().
    * @param $headers
    *   An array containing additional HTTP request headers, each formatted as
    *   "name: value".
+   * @param $form_html_id
+   *   (optional) HTML ID of the form to be submitted. On some pages
+   *   there are many identical forms, so just using the value of the submit
+   *   button is not enough. For example: 'trigger-node-presave-assign-form'.
+   *   Note that this is not the Drupal $form_id, but rather the HTML ID of the
+   *   form, which is typically the same thing but with hyphens replacing the
+   *   underscores.
+   * @param $extra_post
+   *   (optional) A string of additional data to append to the POST submission.
+   *   This can be used to add POST data for which there are no HTML fields, as
+   *   is done by drupalPostAJAX(). This string is literally appended to the
+   *   POST data, so it must already be urlencoded and contain a leading "&"
+   *   (e.g., "&extra_var1=hello+world&extra_var2=you%26me").
    */
-  protected function drupalPost($path, $edit, $submit, array $options = array(), array $headers = array()) {
+  protected function drupalPost($path, $edit, $submit, array $options = array(), array $headers = array(), $form_html_id = NULL, $extra_post = NULL) {
     $submit_matches = FALSE;
     if (isset($path)) {
-      $html = $this->drupalGet($path, $options);
+      $this->drupalGet($path, $options);
     }
     if ($this->parse()) {
       $edit_save = $edit;
       // Let's iterate over all the forms.
-      $forms = $this->xpath('//form');
+      $xpath = "//form";
+      if (!empty($form_html_id)) {
+        $xpath .= "[@id='" . $form_html_id . "']";
+      }
+      $forms = $this->xpath($xpath);
       foreach ($forms as $form) {
         // We try to set the fields of this form as specified in $edit.
         $edit = $edit_save;
@@ -1568,14 +1604,13 @@ class DrupalWebTestCase extends DrupalTestCase {
 
         // We post only if we managed to handle every field in edit and the
         // submit button matches.
-        if (!$edit && $submit_matches) {
+        if (!$edit && ($submit_matches || !isset($submit))) {
           $post_array = $post;
           if ($upload) {
             // TODO: cURL handles file uploads for us, but the implementation
             // is broken. This is a less than elegant workaround. Alternatives
             // are being explored at #253506.
             foreach ($upload as $key => $file) {
-//              $file = drupal_realpath($file);
               $file = realpath($file);
               if ($file && is_file($file)) {
                 $post[$key] = '@' . $file;
@@ -1589,7 +1624,7 @@ class DrupalWebTestCase extends DrupalTestCase {
               // http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.1
               $post[$key] = urlencode($key) . '=' . urlencode($value);
             }
-            $post = implode('&', $post);
+            $post = implode('&', $post) . $extra_post;
           }
           $out = $this->curlExec(array(CURLOPT_URL => $action, CURLOPT_POST => TRUE, CURLOPT_POSTFIELDS => $post, CURLOPT_HTTPHEADER => $headers));
           // Ensure that any changes to variables in the other thread are picked up.
@@ -1610,7 +1645,9 @@ class DrupalWebTestCase extends DrupalTestCase {
       foreach ($edit as $name => $value) {
         $this->fail(t('Failed to set field @name to @value', array('@name' => $name, '@value' => $value)));
       }
-      $this->assertTrue($submit_matches, t('Found the @submit button', array('@submit' => $submit)));
+      if (isset($submit)) {
+        $this->assertTrue($submit_matches, t('Found the @submit button', array('@submit' => $submit)));
+      }
       $this->fail(t('Found the requested form fields at @path', array('@path' => $path)));
     }
   }
@@ -1791,7 +1828,7 @@ class DrupalWebTestCase extends DrupalTestCase {
             break;
           case 'submit':
           case 'image':
-            if ($submit == $value) {
+            if (isset($submit) && $submit == $value) {
               $post[$name] = $value;
               $submit_matches = TRUE;
             }
@@ -1811,6 +1848,48 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
+   * Builds an XPath query.
+   *
+   * Builds an XPath query by replacing placeholders in the query by the value
+   * of the arguments.
+   *
+   * XPath 1.0 (the version supported by libxml2, the underlying XML library
+   * used by PHP) doesn't support any form of quotation. This function
+   * simplifies the building of XPath expression.
+   *
+   * @param $xpath
+   *   An XPath query, possibly with placeholders in the form ':name'.
+   * @param $args
+   *   An array of arguments with keys in the form ':name' matching the
+   *   placeholders in the query. The values may be either strings or numeric
+   *   values.
+   * @return
+   *   An XPath query with arguments replaced.
+   */
+  protected function buildXPathQuery($xpath, array $args = array()) {
+    // Replace placeholders.
+    foreach ($args as $placeholder => $value) {
+      // XPath 1.0 doesn't support a way to escape single or double quotes in a
+      // string literal. We split double quotes out of the string, and encode
+      // them separately.
+      if (is_string($value)) {
+        // Explode the text at the quote characters.
+        $parts = explode('"', $value);
+
+        // Quote the parts.
+        foreach ($parts as &$part) {
+          $part = '"' . $part . '"';
+        }
+
+        // Return the string.
+        $value = count($parts) > 1 ? 'concat(' . implode(', \'"\', ', $parts) . ')' : $parts[0];
+      }
+      $xpath = preg_replace('/' . preg_quote($placeholder) . '\b/', $value, $xpath);
+    }
+    return $xpath;
+  }
+
+  /**
    * Perform an xpath search on the contents of the internal browser. The search
    * is relative to the root element (HTML tag normally) of the page.
    *
@@ -1821,11 +1900,14 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   format and return values see the SimpleXML documentation,
    *   http://us.php.net/manual/function.simplexml-element-xpath.php.
    */
-  protected function xpath($xpath) {
+  protected function xpath($xpath, array $arguments = array()) {
     if ($this->parse()) {
+      $xpath = $this->buildXPathQuery($xpath, $arguments);
       return $this->elements->xpath($xpath);
     }
-    return FALSE;
+    else {
+      return FALSE;
+    }
   }
 
   /**
@@ -1868,8 +1950,8 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertLink($label, $index = 0, $message = '', $group = 'Other') {
-    $links = $this->xpath('//a[text()="' . $label . '"]');
-    $message = ($message ?  $message : t('Link with label "!label" found.', array('!label' => $label)));
+    $links = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
+    $message = ($message ?  $message : t('Link with label %label found.', array('%label' => $label)));
     return $this->assert(isset($links[$index]), $message, $group);
   }
 
@@ -1888,8 +1970,48 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertNoLink($label, $message = '', $group = 'Other') {
-    $links = $this->xpath('//a[text()="' . $label . '"]');
-    $message = ($message ?  $message : t('Link with label "!label" not found.', array('!label' => $label)));
+    $links = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
+    $message = ($message ?  $message : t('Link with label %label not found.', array('%label' => $label)));
+    return $this->assert(empty($links), $message, $group);
+  }
+
+  /**
+   * Pass if a link containing a given href (part) is found.
+   *
+   * @param $href
+   *   The full or partial value of the 'href' attribute of the anchor tag.
+   * @param $index
+   *   Link position counting from zero.
+   * @param $message
+   *   Message to display.
+   * @param $group
+   *   The group this message belongs to, defaults to 'Other'.
+   *
+   * @return
+   *   TRUE if the assertion succeeded, FALSE otherwise.
+   */
+  protected function assertLinkByHref($href, $index = 0, $message = '', $group = 'Other') {
+    $links = $this->xpath('//a[contains(@href, :href)]', array(':href' => $href));
+    $message = ($message ?  $message : t('Link containing href %href found.', array('%href' => $href)));
+    return $this->assert(isset($links[$index]), $message, $group);
+  }
+
+  /**
+   * Pass if a link containing a given href (part) is not found.
+   *
+   * @param $href
+   *   The full or partial value of the 'href' attribute of the anchor tag.
+   * @param $message
+   *   Message to display.
+   * @param $group
+   *   The group this message belongs to, defaults to 'Other'.
+   *
+   * @return
+   *   TRUE if the assertion succeeded, FALSE otherwise.
+   */
+  protected function assertNoLinkByHref($href, $message = '', $group = 'Other') {
+    $links = $this->xpath('//a[contains(@href, :href)]', array(':href' => $href));
+    $message = ($message ?  $message : t('No link containing href %href found.', array('%href' => $href)));
     return $this->assert(empty($links), $message, $group);
   }
 
@@ -1910,15 +2032,15 @@ class DrupalWebTestCase extends DrupalTestCase {
    */
   protected function clickLink($label, $index = 0) {
     $url_before = $this->getUrl();
-    $urls = $this->xpath('//a[text()="' . $label . '"]');
+    $urls = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
 
     if (isset($urls[$index])) {
       $url_target = $this->getAbsoluteUrl($urls[$index]['href']);
     }
 
-    $this->assertTrue(isset($urls[$index]), t('Clicked link "!label" (!url_target) from !url_before', array('!label' => $label, '!url_target' => $url_target, '!url_before' => $url_before)), t('Browser'));
+    $this->assertTrue(isset($urls[$index]), t('Clicked link %label (@url_target) from @url_before', array('%label' => $label, '@url_target' => $url_target, '@url_before' => $url_before)), t('Browser'));
 
-    if (isset($urls[$index])) {
+    if (isset($url_target)) {
       return $this->drupalGet($url_target);
     }
     return FALSE;
@@ -1928,26 +2050,28 @@ class DrupalWebTestCase extends DrupalTestCase {
    * Takes a path and returns an absolute path.
    *
    * @param $path
-   *   The path, can be a Drupal path or a site-relative path. It might have a
-   *   query, too. Can even be an absolute path which is just passed through.
+   *   A path from the internal browser content.
    * @return
-   *   An absolute path.
+   *   The $path with $base_url prepended, if necessary.
    */
   protected function getAbsoluteUrl($path) {
-    $options = array('absolute' => TRUE);
+    global $base_url, $base_path;
+
     $parts = parse_url($path);
-    // This is more crude than the menu_is_external but enough here.
     if (empty($parts['host'])) {
-      $path = $parts['path'];
-      $base_path = base_path();
-      $n = strlen($base_path);
-      if (substr($path, 0, $n) == $base_path) {
-        $path = substr($path, $n);
+      // Ensure that we have a string (and no xpath object).
+      $path = (string) $path;
+      // Strip $base_path, if existent.
+      $length = strlen($base_path);
+      if (substr($path, 0, $length) === $base_path) {
+        $path = substr($path, $length);
       }
-      if (isset($parts['query'])) {
-        $options['query'] = $parts['query'];
+      // Ensure that we have an absolute path.
+      if ($path[0] !== '/') {
+        $path = '/' . $path;
       }
-      $path = url($path, $options);
+      // Finally, prepend the $base_url.
+      $path = $base_url . $path;
     }
     return $path;
   }
@@ -2056,6 +2180,13 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
+   * Gets the value of the Drupal.settings JavaScript variable for the currently loaded page.
+   */
+  protected function drupalGetSettings() {
+    return $this->drupalSettings;
+  }
+
+  /**
    * Gets an array containing all e-mails sent during this test case.
    *
    * @param $filter
@@ -2093,6 +2224,42 @@ class DrupalWebTestCase extends DrupalTestCase {
     $this->url = $url;
     $this->plainTextContent = FALSE;
     $this->elements = FALSE;
+    $this->drupalSettings = array();
+    //if (preg_match('/jQuery\.extend\(Drupal\.settings, (.*?)\);/', $content, $matches)) {
+    //  $this->drupalSettings = drupal_json_decode($matches[1]);
+    //}
+  }
+
+  /**
+   * Sets the value of the Drupal.settings JavaScript variable for the currently loaded page.
+   */
+  protected function drupalSetSettings($settings) {
+    $this->drupalSettings = $settings;
+  }
+
+  /**
+   * Pass if the internal browser's URL matches the given path.
+   *
+   * @param $path
+   *   The expected system path.
+   * @param $options
+   *   (optional) Any additional options to pass for $path to url().
+   * @param $message
+   *   Message to display.
+   * @param $group
+   *   The group this message belongs to, defaults to 'Other'.
+   *
+   * @return
+   *   TRUE on pass, FALSE on fail.
+   */
+  protected function assertUrl($path, array $options = array(), $message = '', $group = 'Other') {
+    if (!$message) {
+      $message = t('Current URL is @url.', array(
+        '@url' => var_export(url($path, $options), TRUE),
+      ));
+    }
+    $options['absolute'] = TRUE;
+    return $this->assertEqual($this->getUrl(), url($path, $options), $message, $group);
   }
 
   /**
@@ -2320,7 +2487,14 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertTitle($title, $message = '', $group = 'Other') {
-    return $this->assertEqual(current($this->xpath('//title')), $title, $message, $group);
+    $actual = (string) current($this->xpath('//title'));
+    if (!$message) {
+      $message = t('Page title @actual is equal to @expected.', array(
+        '@actual' => var_export($actual, TRUE),
+        '@expected' => var_export($title, TRUE),
+      ));
+    }
+    return $this->assertEqual($actual, $title, $message, $group);
   }
 
   /**
@@ -2336,29 +2510,37 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertNoTitle($title, $message = '', $group = 'Other') {
-    return $this->assertNotEqual(current($this->xpath('//title')), $title, $message, $group);
+    $actual = (string) current($this->xpath('//title'));
+    if (!$message) {
+      $message = t('Page title @actual is not equal to @unexpected.', array(
+        '@actual' => var_export($actual, TRUE),
+        '@unexpected' => var_export($title, TRUE),
+      ));
+    }
+    return $this->assertNotEqual($actual, $title, $message, $group);
   }
 
   /**
-   * Assert that a field exists in the current page by the given XPath.
+   * Asserts that a field exists in the current page by the given XPath.
    *
    * @param $xpath
    *   XPath used to find the field.
    * @param $value
-   *   Value of the field to assert.
+   *   (optional) Value of the field to assert.
    * @param $message
-   *   Message to display.
+   *   (optional) Message to display.
    * @param $group
-   *   The group this message belongs to.
+   *   (optional) The group this message belongs to.
+   *
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertFieldByXPath($xpath, $value, $message = '', $group = 'Other') {
+  protected function assertFieldByXPath($xpath, $value = NULL, $message = '', $group = 'Other') {
     $fields = $this->xpath($xpath);
 
     // If value specified then check array for match.
     $found = TRUE;
-    if ($value) {
+    if (isset($value)) {
       $found = FALSE;
       if ($fields) {
         foreach ($fields as $field) {
@@ -2412,25 +2594,26 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Assert that a field does not exist in the current page by the given XPath.
+   * Asserts that a field does not exist in the current page by the given XPath.
    *
    * @param $xpath
    *   XPath used to find the field.
    * @param $value
-   *   Value of the field to assert.
+   *   (optional) Value of the field to assert.
    * @param $message
-   *   Message to display.
+   *   (optional) Message to display.
    * @param $group
-   *   The group this message belongs to.
+   *   (optional) The group this message belongs to.
+   *
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertNoFieldByXPath($xpath, $value, $message = '', $group = 'Other') {
+  protected function assertNoFieldByXPath($xpath, $value = NULL, $message = '', $group = 'Other') {
     $fields = $this->xpath($xpath);
 
     // If value specified then check array for match.
     $found = TRUE;
-    if ($value) {
+    if (isset($value)) {
       $found = FALSE;
       if ($fields) {
         foreach ($fields as $field) {
@@ -2444,7 +2627,7 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Assert that a field exists in the current page with the given name and value.
+   * Asserts that a field exists in the current page with the given name and value.
    *
    * @param $name
    *   Name of field to assert.
@@ -2462,7 +2645,7 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Assert that a field does not exist with the given name and value.
+   * Asserts that a field does not exist with the given name and value.
    *
    * @param $name
    *   Name of field to assert.
@@ -2480,7 +2663,7 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Assert that a field exists in the current page with the given id and value.
+   * Asserts that a field exists in the current page with the given id and value.
    *
    * @param $id
    *   Id of field to assert.
@@ -2498,7 +2681,7 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Assert that a field does not exist with the given id and value.
+   * Asserts that a field does not exist with the given id and value.
    *
    * @param $id
    *   Id of field to assert.
@@ -2516,7 +2699,7 @@ class DrupalWebTestCase extends DrupalTestCase {
   }
 
   /**
-   * Assert that a checkbox field in the current page is checked.
+   * Asserts that a checkbox field in the current page is checked.
    *
    * @param $id
    *   Id of field to assert.
@@ -2526,12 +2709,12 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertFieldChecked($id, $message = '') {
-    $elements = $this->xpath('//input[@id="' . $id . '"]');
+    $elements = $this->xpath('//input[@id=:id]', array(':id' => $id));
     return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), $message ? $message : t('Checkbox field @id is checked.', array('@id' => $id)), t('Browser'));
   }
 
   /**
-   * Assert that a checkbox field in the current page is not checked.
+   * Asserts that a checkbox field in the current page is not checked.
    *
    * @param $id
    *   Id of field to assert.
@@ -2541,12 +2724,48 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertNoFieldChecked($id, $message = '') {
-    $elements = $this->xpath('//input[@id="' . $id . '"]');
+    $elements = $this->xpath('//input[@id=:id]', array(':id' => $id));
     return $this->assertTrue(isset($elements[0]) && empty($elements[0]['checked']), $message ? $message : t('Checkbox field @id is not checked.', array('@id' => $id)), t('Browser'));
   }
 
   /**
-   * Assert that a field exists with the given name or id.
+   * Asserts that a select option in the current page is checked.
+   *
+   * @param $id
+   *   Id of select field to assert.
+   * @param $option
+   *   Option to assert.
+   * @param $message
+   *   Message to display.
+   * @return
+   *   TRUE on pass, FALSE on fail.
+   *
+   * @todo $id is unusable. Replace with $name.
+   */
+  protected function assertOptionSelected($id, $option, $message = '') {
+    $elements = $this->xpath('//select[@id=:id]//option[@value=:option]', array(':id' => $id, ':option' => $option));
+    return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['selected']), $message ? $message : t('Option @option for field @id is selected.', array('@option' => $option, '@id' => $id)), t('Browser'));
+  }
+
+  /**
+   * Asserts that a select option in the current page is not checked.
+   *
+   * @param $id
+   *   Id of select field to assert.
+   * @param $option
+   *   Option to assert.
+   * @param $message
+   *   Message to display.
+   * @return
+   *   TRUE on pass, FALSE on fail.
+   */
+  protected function assertNoOptionSelected($id, $option, $message = '') {
+    $elements = $this->xpath('//select[@id=:id]//option[@value=:option]', array(':id' => $id, ':option' => $option));
+    return $this->assertTrue(isset($elements[0]) && empty($elements[0]['selected']), $message ? $message : t('Option @option for field @id is not selected.', array('@option' => $option, '@id' => $id)), t('Browser'));
+  }
+
+  /**
+   * Asserts that a field exists with the given name or id.
    *
    * @param $field
    *   Name or id of field to assert.
@@ -2558,11 +2777,11 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertField($field, $message = '', $group = 'Other') {
-    return $this->assertFieldByXPath($this->constructFieldXpath('name', $field) . '|' . $this->constructFieldXpath('id', $field), '', $message, $group);
+    return $this->assertFieldByXPath($this->constructFieldXpath('name', $field) . '|' . $this->constructFieldXpath('id', $field), NULL, $message, $group);
   }
 
   /**
-   * Assert that a field does not exist with the given name or id.
+   * Asserts that a field does not exist with the given name or id.
    *
    * @param $field
    *   Name or id of field to assert.
@@ -2574,7 +2793,37 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertNoField($field, $message = '', $group = 'Other') {
-    return $this->assertNoFieldByXPath($this->constructFieldXpath('name', $field) . '|' . $this->constructFieldXpath('id', $field), '', $message, $group);
+    return $this->assertNoFieldByXPath($this->constructFieldXpath('name', $field) . '|' . $this->constructFieldXpath('id', $field), NULL, $message, $group);
+  }
+
+  /**
+   * Asserts that each HTML ID is used for just a single element.
+   *
+   * @param $message
+   *   Message to display.
+   * @param $group
+   *   The group this message belongs to.
+   * @param $ids_to_skip
+   *   An optional array of ids to skip when checking for duplicates. It is
+   *   always a bug to have duplicate HTML IDs, so this parameter is to enable
+   *   incremental fixing of core code. Whenever a test passes this parameter,
+   *   it should add a "todo" comment above the call to this function explaining
+   *   the legacy bug that the test wishes to ignore and including a link to an
+   *   issue that is working to fix that legacy bug.
+   * @return
+   *   TRUE on pass, FALSE on fail.
+   */
+  protected function assertNoDuplicateIds($message = '', $group = 'Other', $ids_to_skip = array()) {
+    $status = TRUE;
+    foreach ($this->xpath('//*[@id]') as $element) {
+      $id = (string) $element['id'];
+      if (isset($seen_ids[$id]) && !in_array($id, $ids_to_skip)) {
+        $this->fail(t('The HTML ID %id is unique.', array('%id' => $id)), $group);
+        $status = FALSE;
+      }
+      $seen_ids[$id] = TRUE;
+    }
+    return $this->assert($status, $message, $group);
   }
 
   /**
@@ -2588,11 +2837,12 @@ class DrupalWebTestCase extends DrupalTestCase {
    *   XPath for specified values.
    */
   protected function constructFieldXpath($attribute, $value) {
-    return '//textarea[@' . $attribute . '="' . $value . '"]|//input[@' . $attribute . '="' . $value . '"]|//select[@' . $attribute . '="' . $value . '"]';
+    $xpath = '//textarea[@' . $attribute . '=:value]|//input[@' . $attribute . '=:value]|//select[@' . $attribute . '=:value]';
+    return $this->buildXPathQuery($xpath, array(':value' => $value));
   }
 
   /**
-   * Assert the page responds with the specified response code.
+   * Asserts the page responds with the specified response code.
    *
    * @param $code
    *   Response code. For example 200 is a successful page request. For a list
@@ -2606,6 +2856,24 @@ class DrupalWebTestCase extends DrupalTestCase {
     $curl_code = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
     $match = is_array($code) ? in_array($curl_code, $code) : $curl_code == $code;
     return $this->assertTrue($match, $message ? $message : t('HTTP response expected !code, actual !curl_code', array('!code' => $code, '!curl_code' => $curl_code)), t('Browser'));
+  }
+
+  /**
+   * Asserts the page did not return the specified response code.
+   *
+   * @param $code
+   *   Response code. For example 200 is a successful page request. For a list
+   *   of all codes see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html.
+   * @param $message
+   *   Message to display.
+   *
+   * @return
+   *   Assertion result.
+   */
+  protected function assertNoResponse($code, $message = '') {
+    $curl_code = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
+    $match = is_array($code) ? in_array($curl_code, $code) : $curl_code == $code;
+    return $this->assertFalse($match, $message ? $message : t('HTTP response not expected !code, actual !curl_code', array('!code' => $code, '!curl_code' => $curl_code)), t('Browser'));
   }
 
   /**
@@ -2692,8 +2960,11 @@ function simpletest_verbose($message, $original_file_directory = NULL, $test_cla
     $class = $test_class;
     $verbose = variable_get('simpletest_verbose', TRUE);
     $directory = $file_directory . '/simpletest/verbose';
-//    return file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-    return file_check_directory($directory, FILE_CREATE_DIRECTORY);
+    $writable = file_check_directory($directory, FILE_CREATE_DIRECTORY);
+    if ($writable && !file_exists($directory . '/.htaccess')) {
+      file_put_contents($directory . '/.htaccess', "<IfModule mod_expires.c>\nExpiresActive Off\n</IfModule>\n");
+    }
+    return $writable;
   }
   return FALSE;
 }

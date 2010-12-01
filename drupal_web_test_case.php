@@ -411,11 +411,29 @@ abstract class DrupalTestCase {
   }
 
   /**
+   * Logs verbose message in a text file.
+   *
+   * The a link to the vebose message will be placed in the test results via
+   * as a passing assertion with the text '[verbose message]'.
+   *
+   * @param $message
+   *   The verbose message to be stored.
+   *
+   * @see simpletest_verbose()
+   */
+  protected function verbose($message) {
+    if ($id = simpletest_verbose($message)) {
+      $url = $GLOBALS['base_url'] . '/' . $this->originalFileDirectory . '/simpletest/verbose/' . get_class($this) . '-' . $id . '.html';
+      $this->error(l(t('Verbose message'), $url, array('attributes' => array('target' => '_blank'))), 'User notice');
+    }
+  }
+
+  /**
    * Run all tests in this class.
    */
   public function run() {
     // Initialize verbose debugging.
-    simpletest_verbose(NULL, file_directory_path(), get_class($this));
+    simpletest_verbose(NULL, variable_get('file_directory_path', conf_path() . '/files'), get_class($this));
 
     // HTTP auth settings (<username>:<password>) for the simpletest browser
     // when sending requests to the test site.
@@ -1309,7 +1327,7 @@ class DrupalWebTestCase extends DrupalTestCase {
    * See the description of $curl_options for other options.
    */
   protected function curlInitialize() {
-    global $base_url, $db_prefix;
+    global $base_url;
 
     if (!isset($this->curlHandle)) {
       $this->curlHandle = curl_init();
@@ -1333,7 +1351,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     }
     // We set the user agent header on each request so as to use the current
     // time and a new uniqid.
-    if (preg_match('/simpletest\d+/', $db_prefix, $matches)) {
+    if (preg_match('/simpletest\d+/', $GLOBALS['db_prefix'], $matches)) {
       curl_setopt($this->curlHandle, CURLOPT_USERAGENT, drupal_generate_test_ua($matches[0]));
     }
   }
@@ -1518,13 +1536,6 @@ class DrupalWebTestCase extends DrupalTestCase {
                    '<hr />' . $out);
     return $out;
   }
-
-  ///**
-  // * Retrieve a Drupal path or an absolute path and JSON decode the result.
-  // */
-  //protected function drupalGetAJAX($path, array $options = array(), array $headers = array()) {
-  //  return drupal_json_decode($this->drupalGet($path, $options, $headers));
-  //}
 
   /**
    * Execute a POST request on a Drupal page.
@@ -1909,7 +1920,11 @@ class DrupalWebTestCase extends DrupalTestCase {
   protected function xpath($xpath, array $arguments = array()) {
     if ($this->parse()) {
       $xpath = $this->buildXPathQuery($xpath, $arguments);
-      return $this->elements->xpath($xpath);
+      $result = $this->elements->xpath($xpath);
+      // Some combinations of PHP / libxml versions return an empty array
+      // instead of the documented FALSE. Forcefully convert any falsish values
+      // to an empty array to allow foreach(...) constructions.
+      return $result ? $result : array();
     }
     else {
       return FALSE;
@@ -2206,7 +2221,7 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     foreach ($captured_emails as $message) {
       foreach ($filter as $key => $value) {
-        if (!isset($message['params'][$key]) || $message['params'][$key] != $value) {
+        if ((!isset($message[$key]) || $message[$key] != $value) && (!isset($message['params'][$key]) || $message['params'][$key] != $value)) {
           continue 2;
         }
       }
@@ -2900,29 +2915,68 @@ class DrupalWebTestCase extends DrupalTestCase {
   protected function assertMail($name, $value = '', $message = '') {
     $captured_emails = variable_get('drupal_test_email_collector', array());
     $email = end($captured_emails);
-//    return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('E-mail'));
-    return $this->assertTrue(
-      ($email && isset($email[$name]) && $email[$name] == $value) ||
-      ($email && isset($email['params'][$name]) && $email['params'][$name] == $value),
-      $message,
-      t('E-mail'));
+    return $this->assertTrue($email && (isset($email[$name]) && $email[$name] == $value || isset($email['params'][$name]) && $email['params'][$name] == $value), $message, t('E-mail'));
   }
 
   /**
-   * Logs verbose message in a text file.
+   * Asserts that the most recently sent e-mail message has the string in it.
    *
-   * The a link to the vebose message will be placed in the test results via
-   * as a passing assertion with the text '[verbose message]'.
+   * @param $field_name
+   *   Name of field or message property to assert: subject, body, id, ...
+   * @param $string
+   *   String to search for.
+   * @param $email_depth
+   *   Number of emails to search for string, starting with most recent.
    *
-   * @param $message
-   *   The verbose message to be stored.
-   *
-   * @see simpletest_verbose()
+   * @return
+   *   TRUE on pass, FALSE on fail.
    */
-  protected function verbose($message) {
-    if ($id = simpletest_verbose($message)) {
-      $file_path = $GLOBALS['base_url'] . '/' . $this->originalFileDirectory . '/simpletest/verbose/' . get_class($this) . '-' . $id . '.html';
-      $this->pass(l(t('Verbose message'), $file_path, array('attributes' => array('target' => '_blank'))), 'Debug');
+  protected function assertMailString($field_name, $string, $email_depth) {
+    $mails = $this->drupalGetMails();
+    $string_found = FALSE;
+    for ($i = sizeof($mails) -1; $i >= sizeof($mails) - $email_depth && $i >= 0; $i--) {
+      $mail = $mails[$i];
+      // Normalize whitespace, as we don't know what the mail system might have
+      // done. Any run of whitespace becomes a single space.
+      $normalized_mail = preg_replace('/\s+/', ' ', $mail[$field_name]);
+      $normalized_string = preg_replace('/\s+/', ' ', $string);
+      $string_found = (FALSE !== strpos($normalized_mail, $normalized_string));
+      if ($string_found) {
+        break;
+      }
+    }
+    return $this->assertTrue($string_found, t('Expected text found in @field of email message: "@expected".', array('@field' => $field_name, '@expected' => $string)));
+  }
+
+  /**
+   * Asserts that the most recently sent e-mail message has the pattern in it.
+   *
+   * @param $field_name
+   *   Name of field or message property to assert: subject, body, id, ...
+   * @param $regex
+   *   Pattern to search for.
+   *
+   * @return
+   *   TRUE on pass, FALSE on fail.
+   */
+  protected function assertMailPattern($field_name, $regex, $message) {
+    $mails = $this->drupalGetMails();
+    $mail = end($mails);
+    $regex_found = preg_match("/$regex/", $mail[$field_name]);
+    return $this->assertTrue($regex_found, t('Expected text found in @field of email message: "@expected".', array('@field' => $field_name, '@expected' => $regex)));
+  }
+
+  /**
+   * Outputs to verbose the most recent $count emails sent.
+   *
+   * @param $count
+   *   Optional number of emails to output.
+   */
+  protected function verboseEmail($count = 1) {
+    $mails = $this->drupalGetMails();
+    for ($i = sizeof($mails) -1; $i >= sizeof($mails) - $count && $i >= 0; $i--) {
+      $mail = $mails[$i];
+      $this->verbose(t('Email:') . '<pre>' . print_r($mail, TRUE) . '</pre>');
     }
   }
 }

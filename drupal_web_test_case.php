@@ -605,6 +605,13 @@ class DrupalUnitTestCase extends DrupalTestCase {
  */
 class DrupalWebTestCase extends DrupalTestCase {
   /**
+   * The profile to install as a basis for testing.
+   *
+   * @var string
+   */
+  protected $profile = 'default';
+
+  /**
    * The URL currently loaded in the internal browser.
    *
    * @var string
@@ -1071,7 +1078,7 @@ class DrupalWebTestCase extends DrupalTestCase {
 //    $this->originalLanguageDefault = variable_get('language_default');
     $this->originalPrefix = $db_prefix;
     $this->originalFileDirectory = file_directory_path();
-//    $this->originalProfile = drupal_get_profile();
+    $this->originalProfile = variable_get('install_profile', 'default');
     $clean_url_original = variable_get('clean_url', 0);
 
     // Must reset locale here, since schema calls t(). (Drupal 6)
@@ -1113,16 +1120,12 @@ class DrupalWebTestCase extends DrupalTestCase {
 
 //    $this->preloadRegistry();
 
-//    // Include the default profile
-//    variable_set('install_profile', 'default');
-//    $profile_details = install_profile_info('default', 'en');
+    // Include the testing profile.
+    variable_set('install_profile', $this->profile);
+    $profile_modules = drupal_verify_profile($this->profile, 'en');
 
-    // Add the specified modules to the list of modules in the default profile.
-    // Install the modules specified by the default profile.
-//    drupal_install_modules($profile_details['dependencies'], TRUE);
-    drupal_install_modules(drupal_verify_profile('default', 'en'));
-
-//    node_type_clear();
+    // Install the modules specified by the testing profile.
+    drupal_install_modules($profile_modules);
 
     // Install modules needed for this test. This could have been passed in as
     // either a single array argument or a variable number of string arguments.
@@ -1142,11 +1145,12 @@ class DrupalWebTestCase extends DrupalTestCase {
     // calls to it will fail.
     drupal_get_schema(NULL, TRUE);
 
-    // Run default profile tasks.
-//    $install_state = array();
-//    drupal_install_modules(array('default'), TRUE);
+    // Run the profile tasks.
     $task = 'profile';
-    default_profile_tasks($task, '');
+    $function = $this->profile . '_profile_tasks';
+    if (function_exists($function)) {
+      $function($task, '');
+    }
 
     // Rebuild caches.
 //    node_types_rebuild();
@@ -1164,9 +1168,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     $user = user_load(array('uid' => 1));
 
     // Restore necessary variables.
-    variable_set('install_profile', 'default');
-//    variable_set('install_task', 'done');
-    variable_set('install_task', 'profile-finished');
+    variable_set('install_task', 'done');
     variable_set('clean_url', $clean_url_original);
     variable_set('site_mail', 'simpletest@example.com');
 //    // Set up English language.

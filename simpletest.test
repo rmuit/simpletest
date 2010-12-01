@@ -421,6 +421,28 @@ class SimpleTestMailCaptureTestCase extends DrupalWebTestCase {
 }
 
 /**
+ * Test Folder creation
+ */
+class SimpleTestFolderTestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Testing SimpleTest setUp',
+      'description' => "This test will check SimpleTest's treatment of hook_install during setUp.",
+      'group' => 'SimpleTest',
+    );
+  }
+
+  function setUp() {
+    parent::setUp(array('simpletest'));
+  }
+
+  function testFolderSetup() {
+    $path = file_directory_path() . '/simpletest';
+    $this->assertTrue(file_check_directory($path, FALSE), "Directory $path created.");
+  }
+}
+
+/**
  * Test required modules for tests.
  */
 class SimpleTestMissingDependentModuleUnitTest extends DrupalUnitTestCase {

@@ -1,14 +1,8 @@
 <?php
 // $Id$
-// Core: Id: run-tests.sh,v 1.35 2009/08/17 19:14:41 webchick Exp
-
 /**
  * @file
- * Backport of Drupal 7 run-tests.sh with modifications, see BACKPORT.txt.
- * This file must be placed in the Drupal scripts folder in order for it to
- * work properly.
- *
- * Copyright 2008-2009 by Jimmy Berry ("boombatower", http://drupal.org/user/214218)
+ * This script runs Drupal tests from command line.
  */
 
 define('SIMPLETEST_SCRIPT_COLOR_PASS', 32); // Green.
@@ -77,15 +71,11 @@ if ($args['list']) {
 $test_list = simpletest_script_get_test_list();
 
 // Try to allocate unlimited time to run the tests.
-//drupal_set_time_limit(0);
-if (!ini_get('safe_mode')) {
-  set_time_limit(0);
-}
+@set_time_limit(0);
 
 simpletest_script_reporter_init();
 
 // Setup database for test results.
-//$test_id = db_insert('simpletest_test_id')->useDefaults(array('test_id'))->execute();
 db_query('INSERT INTO {simpletest_test_id} VALUES (default)');
 $test_id = db_last_insert_id('simpletest_test_id', 'test_id');
 
@@ -236,7 +226,7 @@ function simpletest_script_parse_args() {
     exit;
   }
   elseif ($args['concurrency'] > 1 && !function_exists('pcntl_fork')) {
-    simpletest_script_print_error("Parallel test execution requires the Process Control extension to be compiled in PHP. Please see http://php.net/manual/en/intro.pcntl.php for more information.");
+    simpletest_script_print_error("Parallel test execution requires the Process Control extension to be compiled in PHP. See http://php.net/manual/en/intro.pcntl.php for more information.");
     exit;
   }
 
@@ -265,7 +255,7 @@ function simpletest_script_init($server_software) {
     list($php, ) = explode(' ', $_ENV['SUDO_COMMAND'], 2);
   }
   else {
-    simpletest_script_print_error('Unable to automatically determine the path to the PHP interpreter. Please supply the --php command line argument.');
+    simpletest_script_print_error('Unable to automatically determine the path to the PHP interpreter. Supply the --php command line argument.');
     simpletest_script_help();
     exit();
   }
@@ -362,7 +352,6 @@ function simpletest_script_execute_batch() {
  * Run a single test (assume a Drupal bootstrapped environment).
  */
 function simpletest_script_run_one_test($test_id, $test_class) {
-  // Drupal 6.
   require_once drupal_get_path('module', 'simpletest') . '/drupal_web_test_case.php';
   $classes = simpletest_test_get_all_classes();
   require_once $classes[$test_class]->file;
@@ -424,11 +413,10 @@ function simpletest_script_get_test_list() {
 
       // Check for valid class names.
       foreach ($all_tests as $class_name) {
-        if (class_exists($class_name, FALSE)) {
-          $refclass = new ReflectionClass($class_name);
-          if (isset($files[$refclass->getFileName()])) {
-            $test_list[] = $class_name;
-          }
+        $refclass = new ReflectionClass($class_name);
+        $file = $refclass->getFileName();
+        if (isset($files[$file])) {
+          $test_list[] = $class_name;
         }
       }
     }

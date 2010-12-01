@@ -30,10 +30,9 @@ SimpleTest module (simpletest.module)
   * _simpletest_batch_finished()
   * simpletest_clean_database
     - Added simpletest_get_like_tables()
-  * simpletest_clean_temporary_directory()
+  * simpletest_file_unmanaged_delete_recursive()
   * simpletest_test_form()
   * _drupal_decode_exception()
-  * Added hook_form_system_modules_alter()
 
 SimpleTest installer (simpletest.install)
 -----------------------------------------

@@ -194,8 +194,8 @@ function simpletest_test_form_submit($form, &$form_state) {
   $tests_list = array();
   $classes = simpletest_test_get_all_classes();
   foreach ($form_state['values'] as $class_name => $value) {
-    if (isset($classes[$class_name]['file'])) {
-      require_once $classes[$class_name]['file'];
+    if (isset($classes[$class_name]->file)) {
+      require_once $classes[$class_name]->file;
     }
 
     // Since class_exists() will likely trigger an autoload lookup,
@@ -255,7 +255,7 @@ function simpletest_result_form(&$form_state, $test_id) {
   $classes = simpletest_test_get_all_classes();
 
   foreach ($results as $group => $assertions) {
-    require_once $classes[$group]['file'];
+    require_once $classes[$group]->file;
 
     // Create group fieldset with summary information.
     $info = call_user_func(array($group, 'getInfo'));

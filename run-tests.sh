@@ -365,7 +365,7 @@ function simpletest_script_run_one_test($test_id, $test_class) {
   // Drupal 6.
   require_once drupal_get_path('module', 'simpletest') . '/drupal_web_test_case.php';
   $classes = simpletest_test_get_all_classes();
-  require_once $classes[$test_class]['file'];
+  require_once $classes[$test_class]->file;
 
   $test = new $test_class($test_id);
   $test->run();
@@ -418,7 +418,6 @@ function simpletest_script_get_test_list() {
       require_once drupal_get_path('module', 'simpletest') . '/drupal_web_test_case.php';
       $files = array();
       foreach ($args['test_names'] as $file) {
-//        $files[drupal_realpath($file)] = 1;
         $files[realpath($file)] = 1;
         require_once realpath($file);
       }
@@ -508,11 +507,9 @@ function simpletest_script_reporter_display_results() {
       'exception' => 'Exception'
     );
 
-//    $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id ORDER BY test_class, message_id", array(':test_id' => $test_id));
     $results = db_query("SELECT * FROM {simpletest} WHERE test_id = %d ORDER BY test_class, message_id", $test_id);
 
     $test_class = '';
-//    foreach ($results as $result) {
     while ($result = db_fetch_object($results)) {
       if (isset($results_map[$result->status])) {
         if ($result->test_class != $test_class) {

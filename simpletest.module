@@ -529,21 +529,3 @@ function simpletest_clean_results_table($test_id = NULL) {
   }
   return 0;
 }
-
-/**
- * Implementation of hook_form_FORM_ID_alter(): system_modules. (Drupal 6)
- *
- * Hide modules that have 'hidden = TRUE' in their .info files.
- */
-function simpletest_form_system_modules_alter(&$form, $form_state) {
-  foreach ($form['validation_modules']['#value'] as $filename => $file) {
-    if (!empty($file->info['hidden'])) {
-      unset($form['name'][$filename]);
-      unset($form['version'][$filename]);
-      unset($form['description'][$filename]);
-      unset($form['status']['#options'][$filename]);
-      unset($form['throttle']['#options'][$filename]);
-      unset($form['validation_modules']['#value'][$filename]);
-    }
-  }
-}

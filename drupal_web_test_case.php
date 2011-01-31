@@ -441,8 +441,17 @@ abstract class DrupalTestCase {
 
   /**
    * Run all tests in this class.
+   *
+   * Regardless of whether $methods are passed or not, only method names
+   * starting with "test" are executed.
+   *
+   * @param $methods
+   *   (optional) A list of method names in the test case class to run; e.g.,
+   *   array('testFoo', 'testBar'). By default, all methods of the class are
+   *   taken into account, but it can be useful to only run a few selected test
+   *   methods during debugging.
    */
-  public function run() {
+  public function run(array $methods = array()) {
     // Initialize verbose debugging.
     simpletest_verbose(NULL, variable_get('file_directory_path', conf_path() . '/files'), get_class($this));
 
@@ -457,8 +466,13 @@ abstract class DrupalTestCase {
 
     set_error_handler(array($this, 'errorHandler'));
     $class = get_class($this);
-    // Iterate through all the methods in this class.
-    foreach (get_class_methods($class) as $method) {
+    // Iterate through all the methods in this class, unless a specific list of
+    // methods to run was passed.
+    $class_methods = get_class_methods($class);
+    if ($methods) {
+      $class_methods = array_intersect($class_methods, $methods);
+    }
+    foreach ($class_methods as $method) {
       // If the current method starts with "test", run it - it's a test.
       if (strtolower(substr($method, 0, 4)) == 'test') {
         // Insert a fail record. This will be deleted on completion to ensure
@@ -571,6 +585,55 @@ abstract class DrupalTestCase {
       $str .= chr($values[mt_rand(0, $max)]);
     }
     return $str;
+  }
+
+  /**
+   * Converts a list of possible parameters into a stack of permutations.
+   *
+   * Takes a list of parameters containing possible values, and converts all of
+   * them into a list of items containing every possible permutation.
+   *
+   * Example:
+   * @code
+   * $parameters = array(
+   *   'one' => array(0, 1),
+   *   'two' => array(2, 3),
+   * );
+   * $permutations = $this->permute($parameters);
+   * // Result:
+   * $permutations == array(
+   *   array('one' => 0, 'two' => 2),
+   *   array('one' => 1, 'two' => 2),
+   *   array('one' => 0, 'two' => 3),
+   *   array('one' => 1, 'two' => 3),
+   * )
+   * @endcode
+   *
+   * @param $parameters
+   *   An associative array of parameters, keyed by parameter name, and whose
+   *   values are arrays of parameter values.
+   *
+   * @return
+   *   A list of permutations, which is an array of arrays. Each inner array
+   *   contains the full list of parameters that have been passed, but with a
+   *   single value only.
+   */
+  public static function generatePermutations($parameters) {
+    $all_permutations = array(array());
+    foreach ($parameters as $parameter => $values) {
+      $new_permutations = array();
+      // Iterate over all values of the parameter.
+      foreach ($values as $value) {
+        // Iterate over all existing permutations.
+        foreach ($all_permutations as $permutation) {
+          // Add the new parameter value to existing permutations.
+          $new_permutations[] = $permutation + array($parameter => $value);
+        }
+      }
+      // Replace the old permutations with the new permutations.
+      $all_permutations = $new_permutations;
+    }
+    return $all_permutations;
   }
 }
 
@@ -1651,7 +1714,7 @@ class DrupalWebTestCase extends DrupalTestCase {
         $post = array();
         $upload = array();
         $submit_matches = $this->handleForm($post, $edit, $upload, $submit, $form);
-        $action = isset($form['action']) ? $this->getAbsoluteUrl($form['action']) : $this->getUrl();
+        $action = isset($form['action']) ? $this->getAbsoluteUrl((string) $form['action']) : $this->getUrl();
 
         // We post only if we managed to handle every field in edit and the
         // submit button matches.

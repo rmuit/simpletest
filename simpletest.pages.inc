@@ -368,7 +368,7 @@ function simpletest_result_form_submit($form, &$form_state) {
   }
 
   if (!$classes) {
-    $form_state['redirect'] = 'admin/config/development/testing';
+    $form_state['redirect'] = 'admin/build/testing';
     return;
   }
 

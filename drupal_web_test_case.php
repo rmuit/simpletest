@@ -1397,8 +1397,8 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Reload module list and implementations to ensure that test module hooks
     // aren't called after tests.
-    module_list(TRUE);
-    module_implements('', '', TRUE);
+    module_list(TRUE, FALSE);
+    module_implements('', FALSE, TRUE);
 
     // Rebuild caches.
     $this->refreshVariables();

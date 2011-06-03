@@ -1848,6 +1848,14 @@ class DrupalWebTestCase extends DrupalTestCase {
           case 'textarea':
           case 'hidden':
           case 'password':
+          // In order to support PIFR's review of Drupal 7+ core patches, we
+          // need to ensure that new core elements are supported here even if
+          // they are not available for Drupal 6.
+          case 'email':
+          case 'url':
+          case 'tel':
+          case 'number':
+          case 'range':
             $post[$name] = $edit[$name];
             unset($edit[$name]);
             break;

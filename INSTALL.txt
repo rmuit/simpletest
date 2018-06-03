@@ -21,11 +21,17 @@ INSTALLATION
    http://drupal.org/files/issues/simpletest_drupal.js_.patch.
 
 3. (Optional)
+   To see messages about deprecations (which Drupal suppresses by default), add
+   the following line to settings.php:
+
+   error_reporting(E_ALL);
+
+4. (Optional)
    Move/Copy the run-tests.sh file into the Drupal scripts folder. The script
    allows the tests to be run from the command line.
 
-4. Go to Administer >> Site building >> Modules (admin/build/modules) and
+5. Go to Administer >> Site building >> Modules (admin/build/modules) and
    enable the SimpleTest module.
 
-5. Go to Administer >> Site building >> Testing (admin/build/testing) to
-   begin using the module.
+6. Go to Administer >> Site building >> Testing (admin/build/testing) to
+   begin using the module. If you're not user #1: first assign permissions.

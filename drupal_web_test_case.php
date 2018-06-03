@@ -497,14 +497,18 @@ abstract class DrupalTestCase {
       // If the current method starts with "test", run it - it's a test.
       if (strtolower(substr($method, 0, 4)) == 'test') {
         // Insert a fail record. This will be deleted on completion to ensure
-        // that testing completed.
+        // that testing completed. If it still exists on test completion and
+        // the fatal error occurred inside a test method, not in a Curl
+        // request, then the error is likely only logged in the
+        // 'simpletestNNNwatchdog' table - which is left in the database. (This
+        // is likely, as not many tests are started inside a Curl request.)
         $method_info = new ReflectionMethod($class, $method);
         $caller = array(
           'file' => $method_info->getFileName(),
           'line' => $method_info->getStartLine(),
           'function' => $class . '->' . $method . '()',
         );
-        $completion_check_id = DrupalTestCase::insertAssert($this->testId, $class, FALSE, t('The test did not complete due to a fatal error.'), 'Completion check', $caller);
+        $completion_check_id = DrupalTestCase::insertAssert($this->testId, $class, FALSE, t("The test did not complete due to a fatal error. The error message may be present in a 'watchdog' table used by the test, still exists in the database."), 'Completion check', $caller);
         $this->setUp();
         if ($this->setup) {
           try {

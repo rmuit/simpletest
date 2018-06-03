@@ -1315,6 +1315,11 @@ class DrupalWebTestCase extends DrupalTestCase {
     }
     if ($modules) {
       drupal_install_modules($modules);
+      // Let's run hook_boot of new installed modules. Since other calls, like
+      // cron can need it on this request.
+      foreach ($modules as $module) {
+        module_invoke($module, 'boot');
+      }
     }
 
     // Run the profile tasks.

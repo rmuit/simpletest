@@ -81,6 +81,21 @@ abstract class DrupalTestCase {
   protected $skipClasses = array(__CLASS__ => TRUE);
 
   /**
+   * Flag to indicate whether the test has been set up.
+   *
+   * The setUp() method isolates the test from the parent Drupal site by
+   * creating a random prefix for the database and setting up a clean file
+   * storage directory. The tearDown() method then cleans up this test
+   * environment. We must ensure that setUp() has been run. Otherwise,
+   * tearDown() will act on the parent Drupal site rather than the test
+   * environment, destroying live data.
+   *
+   * Backport note: this does not necessarily indicate that setUp() has been
+   * fully run yet; we may still be e.g. installing modules when this is TRUE.
+   */
+  protected $setup = FALSE;
+
+  /**
    * Constructor for DrupalTestCase.
    *
    * @param $test_id
@@ -134,12 +149,19 @@ abstract class DrupalTestCase {
     );
 
     // Store assertion for display after the test has completed.
-    $current_db_prefix = $GLOBALS['db_prefix'];
-    $GLOBALS['db_prefix'] = $this->originalPrefix;
+    // Backport note: we did not port the static array of 'connection info' /
+    // prefixes; we just insert using with the 'original' prefix, assuming this
+    // is the original connection, except if $this->setup is not set yet.
+    if ($this->setup) {
+      $current_db_prefix = $GLOBALS['db_prefix'];
+      $GLOBALS['db_prefix'] = $this->originalPrefix;
+    }
     db_query("INSERT INTO {simpletest}
               (test_id, test_class, status, message, message_group, function, line, file)
               VALUES (%d, '%s', '%s', '%s', '%s', '%s', %d, '%s')", array_values($assertion));
-    $GLOBALS['db_prefix'] = $current_db_prefix;
+    if ($this->setup) {
+      $GLOBALS['db_prefix'] = $current_db_prefix;
+    }
 
     // We do not use a ternary operator here to allow a breakpoint on
     // test failure.
@@ -484,14 +506,19 @@ abstract class DrupalTestCase {
         );
         $completion_check_id = DrupalTestCase::insertAssert($this->testId, $class, FALSE, t('The test did not complete due to a fatal error.'), 'Completion check', $caller);
         $this->setUp();
-        try {
-          $this->$method();
-          // Finish up.
+        if ($this->setup) {
+          try {
+            $this->$method();
+            // Finish up.
+          }
+          catch (Exception $e) {
+            $this->exceptionHandler($e);
+          }
+          $this->tearDown();
         }
-        catch (Exception $e) {
-          $this->exceptionHandler($e);
+        else {
+          $this->fail(t("The test cannot be executed because it has not been set up properly."));
         }
-        $this->tearDown();
         // Remove the completion check record.
         DrupalTestCase::deleteAssert($completion_check_id);
       }
@@ -680,6 +707,9 @@ class DrupalUnitTestCase extends DrupalTestCase {
 
     // Clone the current connection and replace the current prefix.
     $GLOBALS['db_prefix'] = is_array($GLOBALS['db_prefix']) ? $GLOBALS['db_prefix']['default'] : $GLOBALS['db_prefix'] . $this->databasePrefix;
+    // Backport note: set $this->setup at the same time as the database
+    // prefix, so that errorHandler() logs any notices to the correct database.
+    $this->setup = TRUE;
 
     // If locale is enabled then t() will try to access the database and
     // subsequently will fail as the database is not accessible.
@@ -1230,6 +1260,9 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Clone the current connection and replace the current prefix.
     $GLOBALS['db_prefix'] = $db_prefix_new;
+    // Backport note: set $this->setup at the same time as the database
+    // prefix, so that errorHandler() logs any notices to the correct database.
+    $this->setup = TRUE;
 
     // Create test directory ahead of installation so fatal errors and debug
     // information can be logged during installation process.

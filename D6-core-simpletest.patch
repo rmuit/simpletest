@@ -1,36 +1,8 @@
-? sites/all/modules
-? sites/default/files
-? sites/default/settings.php
-Index: install.php
-===================================================================
-RCS file: /cvs/drupal/drupal/install.php,v
-retrieving revision 1.113.2.12
-diff -u -p -r1.113.2.12 install.php
---- install.php	9 May 2010 14:13:31 -0000	1.113.2.12
-+++ install.php	7 Oct 2010 21:55:51 -0000
-@@ -20,6 +20,14 @@ function install_main() {
-   require_once './includes/bootstrap.inc';
-   drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
- 
-+  // The user agent header is used to pass a database prefix in the request when
-+  // running tests. However, for security reasons, it is imperative that no
-+  // installation be permitted using such a prefix.
-+  if (isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], "simpletest") !== FALSE) {
-+    header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
-+    exit;
-+  }
-+
-   // This must go after drupal_bootstrap(), which unsets globals!
-   global $profile, $install_locale, $conf;
- 
-Index: includes/bootstrap.inc
-===================================================================
-RCS file: /cvs/drupal/drupal/includes/bootstrap.inc,v
-retrieving revision 1.206.2.29
-diff -u -p -r1.206.2.29 bootstrap.inc
---- includes/bootstrap.inc	6 Aug 2010 11:50:24 -0000	1.206.2.29
-+++ includes/bootstrap.inc	7 Oct 2010 21:55:51 -0000
-@@ -1112,7 +1112,7 @@ function drupal_bootstrap($phase) {
+diff --git a/includes/bootstrap.inc b/includes/bootstrap.inc
+index 685d5764a..30111e92d 100644
+--- a/includes/bootstrap.inc
++++ b/includes/bootstrap.inc
+@@ -1132,7 +1132,7 @@ function drupal_bootstrap($phase) {
  }
  
  function _drupal_bootstrap($phase) {
@@ -39,7 +11,7 @@ diff -u -p -r1.206.2.29 bootstrap.inc
  
    switch ($phase) {
  
-@@ -1138,6 +1138,19 @@ function _drupal_bootstrap($phase) {
+@@ -1171,6 +1171,19 @@ function _drupal_bootstrap($phase) {
        break;
  
      case DRUPAL_BOOTSTRAP_DATABASE:
@@ -59,9 +31,9 @@ diff -u -p -r1.206.2.29 bootstrap.inc
        // Initialize the default database.
        require_once './includes/database.inc';
        db_set_active();
-@@ -1331,3 +1344,46 @@ function ip_address() {
- 
-   return $ip_address;
+@@ -1790,3 +1803,46 @@ if (!function_exists('ereg')) {
+     return preg_split('/' . $pattern . '/i', $subject, $limit);
+   }
  }
 +
 +/**
@@ -106,14 +78,11 @@ diff -u -p -r1.206.2.29 bootstrap.inc
 +   $check_string = $prefix . ';' . time() . ';' . $salt;
 +   return  $check_string . ';' . base64_encode(hash_hmac('sha1', $check_string, $key, TRUE));
 +}
-Index: includes/common.inc
-===================================================================
-RCS file: /cvs/drupal/drupal/includes/common.inc,v
-retrieving revision 1.756.2.98
-diff -u -p -r1.756.2.98 common.inc
---- includes/common.inc	6 Sep 2010 11:13:27 -0000	1.756.2.98
-+++ includes/common.inc	7 Oct 2010 21:55:51 -0000
-@@ -531,7 +531,7 @@ function drupal_http_request($url, $head
+diff --git a/includes/common.inc b/includes/common.inc
+index bd82515ec..9d00b1a1f 100644
+--- a/includes/common.inc
++++ b/includes/common.inc
+@@ -569,7 +569,7 @@ function drupal_http_request($url, $headers = array(), $method = 'GET', $data =
    // same time won't interfere with each other as they would if the database
    // prefix were stored statically in a file or database variable.
    if (is_string($db_prefix) && preg_match("/^simpletest\d+$/", $db_prefix, $matches)) {
@@ -122,7 +91,7 @@ diff -u -p -r1.756.2.98 common.inc
    }
  
    foreach ($headers as $header => $value) {
-@@ -2661,14 +2661,24 @@ function _drupal_bootstrap_full() {
+@@ -2763,14 +2763,24 @@ function _drupal_bootstrap_full() {
    require_once './includes/mail.inc';
    require_once './includes/actions.inc';
    // Set the Drupal custom error handler.
@@ -147,9 +116,9 @@ diff -u -p -r1.756.2.98 common.inc
 +
 +// Load all enabled modules
    module_load_all();
-   // Let all modules take action before menu system handles the request
-   // We do not want this while running update.php.
-@@ -3789,3 +3799,264 @@ function _drupal_flush_css_js() {
+   // Ensure mt_rand is reseeded, to prevent random values from one page load
+   // being exploited to predict random values in subsequent page loads.
+@@ -3913,3 +3923,264 @@ function _drupal_flush_css_js() {
    }
    variable_set('css_js_query_string', $new_character . substr($string_history, 0, 19));
  }
@@ -414,3 +383,22 @@ diff -u -p -r1.756.2.98 common.inc
 +  $string = $print_r ? print_r($data, TRUE) : var_export($data, TRUE);
 +  trigger_error(trim($label ? "$label: $string" : $string));
 +}
+diff --git a/install.php b/install.php
+index b2764100a..854d552d3 100644
+--- a/install.php
++++ b/install.php
+@@ -19,6 +19,14 @@ function install_main() {
+   require_once './includes/bootstrap.inc';
+   drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
+ 
++  // The user agent header is used to pass a database prefix in the request when
++  // running tests. However, for security reasons, it is imperative that no
++  // installation be permitted using such a prefix.
++  if (isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], "simpletest") !== FALSE) {
++    header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
++    exit;
++  }
++
+   // This must go after drupal_bootstrap(), which unsets globals!
+   global $profile, $install_locale, $conf;
+ 

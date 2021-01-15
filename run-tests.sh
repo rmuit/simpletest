@@ -653,13 +653,16 @@ function simpletest_script_reporter_display_results() {
  * Format the result so that it fits within the default 80 character
  * terminal size.
  *
+ * NOTE - 20 characters of room left. (There used to be a 'caller' column on
+ * the screen, which is not present in the D6 simpletest table.)
+ *
  * @param $result The result object to format.
  */
 function simpletest_script_format_result($result) {
   global $results_map, $color;
 
-  $summary = sprintf("%-10.10s %-10.10s %-30.30s %-5.5s %-20.20s\n",
-    $results_map[$result->status], $result->message_group, basename($result->file), $result->line, $result->caller);
+  $summary = sprintf("%-10.10s %-10.10s %-30.30s %-5.5s\n",
+    $results_map[$result->status], $result->message_group, basename($result->file), $result->line);
 
   simpletest_script_print($summary, simpletest_script_color_code($result->status));
 
@@ -688,7 +691,7 @@ function simpletest_script_print_error($message) {
  */
 function simpletest_script_print($message, $color_code) {
   global $args;
-  if ($args['color']) {
+  if (!empty($args['color'])) {
     echo "\033[" . $color_code . "m" . $message . "\033[0m";
   }
   else {

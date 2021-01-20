@@ -79,7 +79,7 @@ index 685d5764a..30111e92d 100644
 +   return  $check_string . ';' . base64_encode(hash_hmac('sha1', $check_string, $key, TRUE));
 +}
 diff --git a/includes/common.inc b/includes/common.inc
-index bd82515ec..80c01d56d 100644
+index 5ae10bb55..ce6b4affa 100644
 --- a/includes/common.inc
 +++ b/includes/common.inc
 @@ -569,7 +569,7 @@ function drupal_http_request($url, $headers = array(), $method = 'GET', $data =
@@ -118,7 +118,7 @@ index bd82515ec..80c01d56d 100644
    module_load_all();
    // Ensure mt_rand is reseeded, to prevent random values from one page load
    // being exploited to predict random values in subsequent page loads.
-@@ -3913,3 +3923,263 @@ function _drupal_flush_css_js() {
+@@ -3913,3 +3923,262 @@ function _drupal_flush_css_js() {
    }
    variable_set('css_js_query_string', $new_character . substr($string_history, 0, 19));
  }
@@ -150,26 +150,25 @@ index bd82515ec..80c01d56d 100644
 + * @param $line
 + *   The line number the error was raised at.
 + * @param $context
-+ *   An array that points to the active symbol table at the point the error occurred.
++ *   An array that points to the active symbol table at the point the error
++ *   occurred (on PHP < 8)
 + */
-+function _drupal_error_handler($error_level, $message, $filename, $line, $context) {
++function _drupal_error_handler($error_level, $message, $filename, $line, $context = array()) {
 +  if ($error_level & error_reporting()) {
 +    // All these constants are documented at http://php.net/manual/en/errorfunc.constants.php
 +    $types = array(
-+      E_ERROR => 'Error',
++      E_STRICT => 'Strict warning',
 +      E_WARNING => 'Warning',
-+      E_PARSE => 'Parse error',
 +      E_NOTICE => 'Notice',
-+      E_CORE_ERROR => 'Core error',
-+      E_CORE_WARNING => 'Core warning',
-+      E_COMPILE_ERROR => 'Compile error',
-+      E_COMPILE_WARNING => 'Compile warning',
 +      E_USER_ERROR => 'User error',
 +      E_USER_WARNING => 'User warning',
 +      E_USER_NOTICE => 'User notice',
-+      E_STRICT => 'Strict warning',
 +      E_RECOVERABLE_ERROR => 'Recoverable fatal error'
 +    );
++    if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
++      $types[E_DEPRECATED] = 'Deprecated';
++      $types[E_USER_DEPRECATED] = 'User deprecated';
++    }
 +    $caller = _drupal_get_last_caller(debug_backtrace());
 +
 +    // We treat recoverable errors as fatal.

@@ -513,16 +513,18 @@ abstract class DrupalTestCase {
         E_STRICT => 'Run-time notice',
         E_WARNING => 'Warning',
         E_NOTICE => 'Notice',
-        E_CORE_ERROR => 'Core error',
-        E_CORE_WARNING => 'Core warning',
         E_USER_ERROR => 'User error',
         E_USER_WARNING => 'User warning',
         E_USER_NOTICE => 'User notice',
         E_RECOVERABLE_ERROR => 'Recoverable error',
       );
-
+      if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
+        $error_map[E_DEPRECATED] = 'Deprecated';
+        $error_map[E_USER_DEPRECATED] = 'User deprecated';
+      }
       $backtrace = debug_backtrace();
-      $this->error($message, $error_map[$severity], _drupal_get_last_caller($backtrace));
+      $group = isset($error_map[$severity]) ? $error_map[$severity] : 'Unknown error';
+      $this->error($message, $group, _drupal_get_last_caller($backtrace));
     }
     return TRUE;
   }

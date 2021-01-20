@@ -1759,13 +1759,19 @@ class DrupalWebTestCase extends DrupalTestCase {
         if (!$edit && ($submit_matches || !isset($submit))) {
           $post_array = $post;
           if ($upload) {
-            // TODO: cURL handles file uploads for us, but the implementation
-            // is broken. This is a less than elegant workaround. Alternatives
-            // are being explored at #253506.
             foreach ($upload as $key => $file) {
               $file = realpath($file);
               if ($file && is_file($file)) {
-                $post[$key] = '@' . $file;
+                // Use the new CurlFile class for file uploads when using PHP
+                // 5.5.
+                if (class_exists('CurlFile')) {
+                  $post[$key] = curl_file_create($file);
+                }
+                else {
+                  // Old method for Curl file uploads; needs
+                  // CURLOPT_SAFE_UPLOAD = FALSE, which is default in PHP < 5.5.
+                  $post[$key] = '@' . $file;
+                }
               }
             }
           }

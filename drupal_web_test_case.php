@@ -1326,6 +1326,14 @@ class DrupalWebTestCase extends DrupalTestCase {
       }
     }
 
+    if (isset($this->install_locale) && $this->install_locale != 'en') {
+      // Copied from Drupali18nTestCase. (That did its own full setUp(), which
+      // was outdated and buggy by now, so we deleted that and hacked the
+      // support into here.) This was done before the profile tasks, and I'm
+      // guessing that matters.
+      $this->addLanguage($this->install_locale, TRUE);
+    }
+
     // Run the profile tasks.
     $task = 'profile';
     $function = $this->profile . '_profile_tasks';

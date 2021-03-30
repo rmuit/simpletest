@@ -1264,6 +1264,17 @@ class DrupalWebTestCase extends DrupalTestCase {
 
     // Workaround to insure we init the theme layer before going into prefixed
     // environment. (Drupal 6)
+    // TESTING NOTE: this is likely better than risking calling theme() for the
+    // first time _during_ the module install process, but still imperfect.
+    // theme() has a static variable, so will now only know the theme hooks
+    // present on the base system which runs simpletest. The effect is that,
+    // also after switching database prefixes, theme hooks for modules enabled
+    // on the System Under Test (i.e. the prefixed tables) which aren't enabled
+    // on the base system, cannot be found. In other words, theme functions
+    // can only really be trusted when executed from a web/curl request inside
+    // a test. (This might be fixed by splitting this setUp() call and the
+    // test* methods over different batch functions. Which would take a lot of
+    // jiggling of database prefixes etc.)
     $this->pass(t('Starting run with db_prefix %prefix', array('%prefix' => $db_prefix_new)), 'System');
 
     // Clone the current connection and replace the current prefix.
@@ -1363,6 +1374,11 @@ class DrupalWebTestCase extends DrupalTestCase {
     $language = language_default();
 
     // Use the test mail class instead of the default mail handler class.
+    // TESTING NOTE: given how e.g. devel / phpmailer already define
+    // drupal_mail_wrapper() during bootstrap IF 'smtp_library' is set to a
+    // value they expect... that means that IF the base system has the value
+    // redefined to use devel / phpmailer / ... AND IF a test method calls
+    // drupal_mail_send() directly (not via a web/curl request)... we'll crash.
     variable_set('smtp_library', drupal_get_path('module', 'simpletest') . '/simpletest.mail.inc');
 
     set_time_limit($this->timeLimit);

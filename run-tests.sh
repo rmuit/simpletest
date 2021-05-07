@@ -39,7 +39,8 @@ if ($args['clean']) {
   echo "\nEnvironment cleaned.\n";
 
   // Get the status messages and print them.
-  $messages = array_pop(drupal_get_messages('status'));
+  $messages = drupal_get_messages('status');
+  $messages = array_pop($messages);
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }

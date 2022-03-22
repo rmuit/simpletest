@@ -12,7 +12,7 @@ INSTALLATION
 ------------
 1. Apply the D6-core-simpletest.patch file to Drupal 6 core. Navigate to your
    site root and use the following command (for a unix system):
-   patch -p0 < path/to/simpletest/D6-core-simpletest.patch
+   patch -p1 < path/to/simpletest/D6-core-simpletest.patch
 
 2. (Optional)
    Apply the "Show fatal errors in tests" patch to misc/drupal.js if you want

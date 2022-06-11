@@ -747,6 +747,15 @@ class DrupalUnitTestCase extends DrupalTestCase {
  * Test case for typical Drupal tests.
  */
 class DrupalWebTestCase extends DrupalTestCase {
+
+  /**
+   * Query parameter for starting XDebug connections.
+   *
+   * Compatible with XDebug 2. For cookie-less XDebug-3 only method, the code
+   * should be changed; not only this value.
+   */
+  const XDEBUG_START_QUERY_ARG = 'XDEBUG_SESSION_START';
+
   /**
    * The profile to install as a basis for testing.
    *
@@ -1549,31 +1558,38 @@ class DrupalWebTestCase extends DrupalTestCase {
     $this->curlInitialize();
 
     if (!empty($curl_options[CURLOPT_URL])) {
-      // Forward Xdebug activation if present - on D6LTS 6.44+ only. (This was
-      // a D7 patch which calls the nonexistent drupal_parse_url() function -
-      // so we use _drupal_parse_url() which was backported in 6.44. If you
-      // want to run this on older Drupals: change that code.)
-      if (isset($_COOKIE['XDEBUG_SESSION']) && function_exists('_drupal_parse_url')) {
-        $options = _drupal_parse_url($curl_options[CURLOPT_URL]);
+      // Forward Xdebug activation if present.
+      if (isset($_COOKIE['XDEBUG_SESSION'])) {
+        // Query/fragment parsing code gleaned from drupal_parse_url().
+        $options = ['query' => array(), 'fragment' => ''];
+        $parts = explode('?', $curl_options[CURLOPT_URL]);
+        $path = $parts[0];
+        if (isset($parts[1])) {
+          // Ignoring fragment; see below.
+          $query_parts = explode('#', $parts[1]);
+          parse_str($query_parts[0], $options['query']);
+          if (isset($query_parts[1])) {
+            $options['fragment'] = $query_parts[1];
+          }
+        }
+
         $options['absolute'] = TRUE;
         // With Xdebug 3, we can use XDEBUG_SESSION instead (to just start
         // Xdebug connections on the one Curl request we'll execute, rather
         // than messing with cookies inside that request) - but that doesn't
         // work for Xdebug 2.
-        $query_arg_start_xdebug = 'XDEBUG_SESSION_START';
-        if (isset($options['query'][$query_arg_start_xdebug])) {
+        if (isset($options['query'][static::XDEBUG_START_QUERY_ARG])) {
           // CURLOPT_URL could have XDEBUG_SESSION now - e.g. when we're
           // posting a form request where the form #action now includes it.
           // Make sure $this->url won't contain it; at least simpletest's own
           // "Passed and requested URL are equal" assertions fail otherwise.
-          unset($options['query'][$query_arg_start_xdebug]);
-          $original_url = url($options['path'], $options);
+          unset($options['query'][static::XDEBUG_START_QUERY_ARG]);
+          $original_url = url($path, $options);
         }
         else {
           $original_url = $curl_options[CURLOPT_URL];
-          $options += array('query' => array());
-          $options['query'] += [$query_arg_start_xdebug => $_COOKIE['XDEBUG_SESSION']];
-          $curl_options[CURLOPT_URL] = url($options['path'], $options);
+          $options['query'] += array(static::XDEBUG_START_QUERY_ARG => $_COOKIE['XDEBUG_SESSION']);
+          $curl_options[CURLOPT_URL] = url($path, $options);
         }
       }
 

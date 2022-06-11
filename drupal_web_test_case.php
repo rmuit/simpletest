@@ -1329,6 +1329,11 @@ class DrupalWebTestCase extends DrupalTestCase {
       $modules = $modules[0];
     }
     if ($modules) {
+      // Some tests pass a list of modules that may or moy not exist.
+      // drupal_install_modules() can handle nonexistent modules... but we
+      // don't want the PHP notices, to prevent confusion.
+      $files = module_rebuild_cache();
+      $modules = array_intersect($modules, array_keys($files));
       drupal_install_modules($modules);
       // Let's run hook_boot of new installed modules. Since other calls, like
       // cron can need it on this request.

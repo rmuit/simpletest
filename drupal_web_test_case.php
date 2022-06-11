@@ -1560,36 +1560,38 @@ class DrupalWebTestCase extends DrupalTestCase {
     if (!empty($curl_options[CURLOPT_URL])) {
       // Forward Xdebug activation if present.
       if (isset($_COOKIE['XDEBUG_SESSION'])) {
-        // Query/fragment parsing code gleaned from drupal_parse_url().
-        $options = ['query' => array(), 'fragment' => ''];
-        $parts = explode('?', $curl_options[CURLOPT_URL]);
-        $path = $parts[0];
-        if (isset($parts[1])) {
-          // Ignoring fragment; see below.
-          $query_parts = explode('#', $parts[1]);
-          parse_str($query_parts[0], $options['query']);
-          if (isset($query_parts[1])) {
-            $options['fragment'] = $query_parts[1];
-          }
+        $query_and_fragment = array('');
+        $query_parts = array();
+        $path_and_rest = explode('?', $curl_options[CURLOPT_URL]);
+        if (isset($path_and_rest[1])) {
+          $query_and_fragment = explode('#', $path_and_rest[1]);
+          parse_str($query_and_fragment[0], $query_parts);
         }
 
-        $options['absolute'] = TRUE;
         // With Xdebug 3, we can use XDEBUG_SESSION instead (to just start
         // Xdebug connections on the one Curl request we'll execute, rather
         // than messing with cookies inside that request) - but that doesn't
         // work for Xdebug 2.
-        if (isset($options['query'][static::XDEBUG_START_QUERY_ARG])) {
+        if (isset($query_parts[static::XDEBUG_START_QUERY_ARG])) {
           // CURLOPT_URL could have XDEBUG_SESSION now - e.g. when we're
           // posting a form request where the form #action now includes it.
-          // Make sure $this->url won't contain it; at least simpletest's own
-          // "Passed and requested URL are equal" assertions fail otherwise.
-          unset($options['query'][static::XDEBUG_START_QUERY_ARG]);
-          $original_url = url($path, $options);
+          // To make URL comparison tests succeeed, make sure $this->url won't
+          // contain it, and do not change other arguments in the query string
+          // by decoding / reencoding them.
+          $query = preg_replace('/(^|&)' .  preg_quote(static::XDEBUG_START_QUERY_ARG) . '=[^&]+/', '', $query_and_fragment[0]);
+          if ($query && $query[0] === '&') {
+            $query = substr($query, 1);
+          }
+          $original_url = $path_and_rest[0] . ($query ?  ('?' . $query) : '')
+            . (isset($query_and_fragment[1]) ?  ('#' . $query_and_fragment[1]) : '');
         }
         else {
           $original_url = $curl_options[CURLOPT_URL];
-          $options['query'] += array(static::XDEBUG_START_QUERY_ARG => $_COOKIE['XDEBUG_SESSION']);
-          $curl_options[CURLOPT_URL] = url($path, $options);
+
+          $query = ($query_and_fragment[0] ? ($query_and_fragment[0] . '&') : '')
+            . static::XDEBUG_START_QUERY_ARG . '=' . urlencode($_COOKIE['XDEBUG_SESSION']);
+          $curl_options[CURLOPT_URL] = $path_and_rest[0] . ($query ?  ('?' . $query) : '')
+            . (isset($query_and_fragment[1]) ?  ('#' . $query_and_fragment[1]) : '');
         }
       }
 

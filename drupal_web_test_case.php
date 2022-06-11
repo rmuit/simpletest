@@ -5,8 +5,8 @@
  *
  * An array, with the following keys:
  *  - 'test_run_id': the ID of the test being run, in the form 'simpletest_%"
- *  - 'in_child_site': TRUE if the current request is a cURL request from
- *     the parent site.
+ *  - 'in_child_site': FALSE, do not use. (This was apparently a failed try in
+ *    a dev version that got reverted; see SimpleTestFunctionalTest::inCURL().)
  *
  * @var array
  */
@@ -508,7 +508,7 @@ abstract class DrupalTestCase {
           'line' => $method_info->getStartLine(),
           'function' => $class . '->' . $method . '()',
         );
-        $completion_check_id = DrupalTestCase::insertAssert($this->testId, $class, FALSE, t("The test did not complete due to a fatal error. The error message may be present in a 'watchdog' table used by the test, still exists in the database."), 'Completion check', $caller);
+        $completion_check_id = DrupalTestCase::insertAssert($this->testId, $class, FALSE, t("The test did not complete due to a fatal error. The error message may be present in a separate 'watchdog' table used by the test, still existing in the database."), 'Completion check', $caller);
         $this->setUp();
         if ($this->setup) {
           try {

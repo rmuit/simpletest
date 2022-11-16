@@ -2297,7 +2297,7 @@ class DrupalWebTestCase extends DrupalTestCase {
       $url_target = $this->getAbsoluteUrl($urls[$index]['href']);
     }
 
-    $this->assertTrue(isset($urls[$index]), t('Clicked link %label (@url_target) from @url_before', array('%label' => $label, '@url_target' => $url_target, '@url_before' => $url_before)), t('Browser'));
+    $this->assertTrue(isset($urls[$index]), t('Clicked link %label (@url_target) from @url_before', array('%label' => $label, '@url_target' => isset($url_target) ? $url_target : 'TARGET URL NOT SET', '@url_before' => $url_before)), t('Browser'));
 
     if (isset($url_target)) {
       return $this->drupalGet($url_target);

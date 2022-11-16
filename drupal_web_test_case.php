@@ -1307,7 +1307,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     ini_set('log_errors', 1);
     ini_set('error_log', $public_files_directory . '/error.log');
 
-    // Reset all statics and variables to perform tests in a clean environment.
+    // Reset statics and variables to perform tests in a clean environment.
     $conf = array();
 
     // Set the test information for use in other parts of Drupal.
@@ -1366,17 +1366,18 @@ class DrupalWebTestCase extends DrupalTestCase {
       $function($task, '');
     }
 
+    // Log in with a clean $user (which is the only user that exists in the
+    // new database, so e.g. user_access() must not be called with another one).
+    $this->originalUser = $user;
+    session_save_session(FALSE);
+    $user = user_load(array('uid' => 1));
+
     // Reset/rebuild all data structures after enabling the modules.
     $this->resetAll();
 
     // Run cron once in that environment, as install.php does at the end of
     // the installation process.
     drupal_cron_run();
-
-    // Log in with a clean $user.
-    $this->originalUser = $user;
-    session_save_session(FALSE);
-    $user = user_load(array('uid' => 1));
 
     // Restore necessary variables.
     variable_set('install_task', 'done');
